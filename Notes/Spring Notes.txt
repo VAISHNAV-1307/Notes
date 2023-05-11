@@ -1,0 +1,159 @@
+
+SPRING -->
+
+IoC -> Inversion of control
+    -> It is a principle in which spring will control logic of our application
+       There are two main ways in IOC is divided
+       A. DI  -> Dependency Injection -> Control is about dependencies in between the objects
+       B. AoP/ Interceptors -> Aspect oriented Programming -> Intercepting and controlling methods execution.
+          breaking of code into different modules, also known as modularisation, where the aspect is the key unit of modularity.
+          Aspects enable the implementation of crosscutting concerns such as- transaction, logging not central to business logic
+          without cluttering the code core to its functionality. It does so by adding additional behaviour that is the advice to
+          the existing code.
+
+Context -> The place where you put object instances that you allow spring to be managed
+           1. The spring context is like a bucket where you have all your instances stored which have unique identifiers
+              and sometime aliases also
+
+Approaches to use context ->
+    1. manually defining bean with @Bean annotation
+    -> When you manually defined the bean the name of the method will be taken as the name of that instance
+       - If you are creating two or more beans of same type then you need to specify name of instance context should
+         provide you in getBean constructor, or it will give an exception
+       a. We can create the beans of classes which are part of jdk
+       b. We can create the beans of classes which are part of external dependencies
+       - If you are creating two beans of same type then it is mandatory to specify which bean instance you want with
+         @Primary or @Qualifier annotation
+
+    2. By using stereotype annotations ( @Component and @ComponentScan )
+    -> The annotation used for creating beans is @Component annotation it is a class level annotation which is given above
+       the class of which bean you wanted and @ComponentScan annotation is used with it which is specified above the configuration
+       class and inside @ComponentScan annotation basePackage is also specified
+       a. We cannot create the beans of classes which are part of jdk
+       b. We cannot create the beans of classes which are part of external dependencies
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+Controllers -> controllers are objects offering entry to the application , It is a layer which offers you entry point to
+               the logic which is written in service layer
+
+Service     -> service layer is objects implementing the use-cases which is business logic, services are define algorithm
+               which happens to the data
+
+--------------------------------------------------------------------------------------------------------------------------
+
+A. Approaches to use dependency injection
+
+1. @Autowired (NEVER RECOMMENDED) ->
+    - By placing this annotation above the declaration of object we told spring to put instance of
+      declared object which is created in context inside that attribute
+    - It injects the dependency of declared object into the class where it is declared. It is necessary that
+      bean of class which dependency you wanted to be injects should be present in context
+    - We can change the value of attribute after the declaration
+      [Autowired on actual fields is not recommended because it implies you attribute which is not final
+       you cannot apply final in front of @Autowired annotation]
+    - If it is not recommended then what is its used -> so it is used for unit testing
+    - It works on default constructor provided by java
+
+2. @RequiredArgsConstructor or through constructor dependency injection (RECOMMENDED) ->
+    - we can use final keyword before the object declaration because final objects are loaded at the time of class loading
+      and cannot be changed after class loading for this we can either use @RequiredArgsConstructor or manually write
+      constructor which will return object
+    - We cannot change the value of attribute after the declaration
+    - after spring 5 you don't need to use @autowired annotation above the declared constructor but it works only if you
+      have only one constructor if you have more than one constructor you need to specify it explicitly.
+
+3. Getter and Setter ->
+    - we can inject dependency through getters and setters also
+    - but it also not recommended because if you can set the attribute it means you are changing its value
+    - and here instead of using autowired annotation above the attribute declaration you use it above the setters
+
+------------------------------------------------------------------------------------------------------------------------
+
+Stereotype annotations -> These are the annotations which creates the bean of that class in context once its placed above the
+                          class eg - @Component or annotations which internally contains @Component annotation eg - @Controller
+                          or @Service
+
+------------------------------------------------------------------------------------------------------------------------
+
+Circular dependency ->
+    - when we want one classes dependency into second class and also second class dependency into first one at that
+      we get an exception this situation is called circular dependency
+    - Lets assume we have two classes named - first and second when we try to get bean of first type it depends on second
+      bean, so it tries to get it from context but there is no bean in context, so it goes to second class and constructor
+      of it, and it tries to create bean of that second class, but it needs first class bean as an input, so it checks it
+      in context, but it is not present there, so it went to first class and loads the constructor of it and this way
+      beans of both classes cannot be, get finished, and we get the situation of deadlock.
+    solutions for resolving circular dependency ->
+      1. Move the method for which you are injecting dependency to that particular class where you need it and avoid the
+         need of that method
+      2. RECOMMENDED - create the third class place both methods which are going to use in classes and inject the dependency
+                       of that third class into both classes
+
+------------------------------------------------------------------------------------------------------------------------
+
+B. Aspects -> - An aspect is a class that contains logic that will be executed when specific methods are called
+              - It is a piece of logic that can stay in between the caller and the object that has been called and can
+                alter the execution
+              - for it, we need to annotate class with @Aspect annotation, and it won't work unless you create the bean
+                of it into context, and you have to enable it by giving @EnableAspectsJAutoProxy annotation
+              - when you called the aspect for any perticuler class instead of getting the real object for that class
+                you will get the proxy of that object which is like wrapper over that object which is generated dynamically
+                and aspect is presented in between the proxy of object and caller
+              - there are some joined points like @Before, @After, @AfterReturning, @AfterThrowing, @Around which will
+                joined that logic to that perticuler method
+                @Before - before the method execution
+                @After - after the method execution
+                @AfterReturning - If method is returning something after that
+                @AfterThrowing - If method is throwing exception after that
+                @Around - To completely wrap the method execution It should be last approach It works for any of four above
+                          - for around you have to take ProceedingJoinPoint class object as a input parameter , so you have
+                            to call proceed() method of proceedingJointPoint object and the code written before the proceed
+                            method will be get executed before the execution of called method and code written after the call
+                            to the proceed method will be conducted after the execution of called method.
+
+
+------------------------------------------------------------------------------------------------------------------------
+
+Singleton and prototype bean ->
+    1. Singleton bean ->
+       - In this type only one instance of object is created and provided it again and again
+       - Singleton bean is different from singleton design pattern
+       - It is a default scope of a spring
+
+    2. Prototype bean ->
+       - If we want new instance of an object everytime at that time we can use prototype bean
+       - we can change the scope by using @Scope annotation which is used above the class of which
+         instance we wanted
+
+------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
+
+SPRING BOOT -->
+    Convention over configuration
+    The main feature of springBoot application is Auto-configuration
+    It has the embedded tomcat server inside the springBoot application
+
+------------------------------------------------------------------------------------------------------------------------
+
+HTTP -> HTTP is a protocol which can be used by any platform
+
+------------------------------------------------------------------------------------------------------------------------
+
+Spring Rest ->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
