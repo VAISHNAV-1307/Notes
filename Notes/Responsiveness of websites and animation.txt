@@ -1,0 +1,54 @@
+ResponsiveNess for websites
+
+    units -
+    1. px -> px never change according to screen
+    2. % -> percent changes according to screen and percent is relative to parent eg -> if div width: 50% which means it is 50% of its parent component
+    3. vh -> height respative to screen. it changes according to screen height
+    4. vw -> width respactive to screen. it changes according to screen width
+    5. vmax -> (view port maximum) it adjust accrding to your screen eg -> if you are browsing on laptop then your width is max then it will take max parameter as width
+                                   but you are browsing on phone then obviously height is maximum then it will take height as max parameter
+    6. vmin -> (view port minimum) same as above but only it takes min value
+    7. em -> it is multipled value of parent eg -> parent has font size 100px then you give child has value 1em which means child got 100 px font size
+             if child has 2em then the font size will be 2 times of parent which means 200px, it is dependent on parent
+    8. rem -> it is dependent upon screen size, 1 rem is equal to 60px
+
+    layout of website ->
+    position absolute -> dont use position absolte
+    display flex -> use display flex for responsiveness
+
+    css mediaQueries ->
+    media queries is used to make changes in CSS properties according the screen size
+    syntax ->
+    @media (max-width : 600px){
+        which ever property I have written in this is aplicable only for screen lover than 600px or equal to 600px
+    }
+
+    key-point ->
+    1. always use display flexbox maximim times
+    2. css units
+    3. responsive typography
+    4. mobile first approach
+    5. flexible images and media
+
+
+Animations in website ->
+    there are two steps in animations
+    1. create the animation
+    2. apply the animation
+
+    create the animation ->
+    there are two important states in animation
+    1.  initial -> before animation ( from { before animating })
+    2. final -> before animation ( to {after animation })
+    animation is a jurny between initial and final state
+    insted of giving form and to only two stages you can give more stages also in the animation with help of percentage
+
+    
+    applying animation ->
+    give this properties in the css properties of that perticular element
+    animation-name :
+    animation-duration :
+    animation-delay :
+
+
+    
