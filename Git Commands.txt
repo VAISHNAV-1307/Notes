@@ -1,0 +1,45 @@
+Git Commands ->
+BASICS
+1.  cd (path)		-> change directory
+2.  ls 		-> to get list of items inside the folder
+3.  ls -a 		-> to get list of hidden items inside the folder
+4.  git status 	-> to get the status of all git files
+5.  git add (. or filename)	-> to add the files for tracking or to insert into staged area (. is used to add everything otherwise u can add spacific file by defining its name ) 
+6.  git commit -m ("message you wnat to commit") 
+			-> to commit the message m means message and the value inside the string is desired message
+NOTE -> we can only commit something after it is added in staged area.
+
+7.  vi (filename)		-> to go inside of any file
+7a. esc+:+x 	-> to get outside of that file
+8.  cat (filename)	-> displays what is inside certain file
+9.  git restore --staged (filename)-> If u want to remove something from staged area
+10. git log 		-> get all the history of logs
+11. rm -rf (filename) 	-> delete the file
+12. git reset (hash_of_log) -> to delete the privious logs of hash which is entered
+13. git stash 	-> to store the changes that has been maid in stash area so we can start fresh project and bring back this changes whenever we want
+14. git stash pop 	-> To bring back the files or commites from stash area
+15. git stash clear 	-> to delete the files/commits from stash area
+
+ADVANCED
+1. git remote add origin (URL) -> to connect the project which is created on github with your local where origin is standerd name for your own account 
+2. git remote -v -> shows all url connected to that perticuler folder in which u are curently now
+3. git push (origin/url u want to push) (branchname) -> to push the changes to remote branch
+Note -> HEAD = it is pointer for current branch
+4. git branch (branchName) -> to create the new branch
+5. git checkout (branchName) -> to move HEAD from existing branch to the specified branch
+6. git merge (branchName) -> to merge the changes of specified branch into the current branch
+Note -> If you want to work on existing project u have to fork in through github then that project will come to your account and then u can clone it u cannot push anything to upstream u can only push your changes into the forked project and after pushing it to your project u will get a popup to raise a pull request so your changes will be get merged into the main project one pull request is accosiated to only one pull request 
+to create another pull request u have to make another branch and push your changes to that baranch
+7. git remote add upstream (URL) -> this will connect your local with url from which u are forked the project
+8. git push (origin) (branchname) -f -> for forced push 
+9. git reset --hard upstream/main -> It will reset your branch like upstream branch
+10.git pull upstream main -> pull the changes from upstream project to your local project
+11.git cherry (branch1) (branch2) -> to compare to branches it will list the changes which are present in one branch but not in other
+12.git remote prune origin 
+
+
+ 
+
+
+
+  

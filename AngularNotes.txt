@@ -1,0 +1,108 @@
+
+    ANGULAR
+
+    Standalone Property ->
+    if this property is enabled inside the @Component annotation in any components TS file then this component is not dependent on any component
+    which means there is no need to register that component in module.ts file
+    syntax -> standalone: true
+
+
+    Data Binding ->
+    we can bind the data from TS to HTML file with three ways
+    1. Interpolation -> for basic dataTypes
+                        here we can directly write the variable name from TS file in html file in double curley brackets
+                        it will show the value of that variable on the page
+    2. Property binding -> we can use native html properties for binding, we can only use it with the valid html property
+                        just we have to describe property name in the [] and values in front of that in ""
+    3. Event Binding -> for binding methods in TS file which will be called on particular event or particular action from UI
+                        we put any angular event in (). eg -> (onClick)
+
+
+    Directives ->
+    directives are something which can change the behaviour of your DOM
+    which can be implemented on all lifecycle hooks
+    it do not have template file they just contain your logic
+    we can create your own directives also
+    we use directives in HTML files
+
+    types of directives ->
+    1. structural -> they are going to change the behaviour of the DOM which can cause the performance issue
+                     they have * at start of there name like *ngIf
+    2. Attribute ->
+
+    Built in directives ->
+    1. *ngIf -> we can manipulate dom based on conditions
+    2. *ngFor -> it just a for loop used to loop array or arrayList in html
+    3. *ngSwitch -> it just like a switch statement
+    4. ngClass -> we can apply css classes using ngClass
+    5. ngStyle -> we can directly give styling to specific html component using ngStyle
+
+    Pipes ->
+    Pipes are used for data transformation
+    in this we didn't change the original object just present it with the different format
+    we can write our own pipes, or we can use default pipes also, basically we can display certain html property in another format
+
+    Built in pipes ->
+    Date pipe -> we just specify it as a datatype in html and you can specify sub format in front of it by ex -> date : "dd/MMM/yyyy"
+    uppercase
+    lowercase
+    currency
+    decimal
+    percent
+    json -> it is mainly used for debugging purpose, when we directly access particular object or particular list we cannot see through it,
+            we just get [object, object] so for this to display property in json format we use json pipe
+    slice -> it is similar to slice property in javascript , it takes to parameters 1 and last index and display values in between 
+    async -> used in http requests
+
+    ADDING EXTERNAL CSS FILE IN PROJECT ->
+    to add any external css u can spacify the file in angular.json file under styles section
+
+    LifeCycle hooks ->
+    this are certain event which happens in lifecycle of every component
+    for every lifecycle hook we have one interface to use it we have to implement that interface
+    1. ngOnChanges -> related to component comunication, we can only apply it over component have input property , if we have to modify some property on basis
+                      of changes we can use it
+    2. ngOnInit -> just after initializing of your component you want to perform some operations at that time ngOnInit is used ex-> for loading some data from api
+    3. ngDoCheck 
+    4. ngAfterContentInit -> 
+    5. ngAfterContentChecked
+    6. ngAfterViewInit -> It is used for ViewChild and we have to make {static : true} inside viewChild property
+    7. ngAfterViewChecked
+    8. ngOnDestroy
+
+    
+    Component communication ->
+    where multiple component interact with each other
+    @input() -> to take input from another component we spacify the @input annotation in TS file of component where we need the data, basically we can access one
+    components TS data into another , in parent component input data is given [] this brackets
+    @output() -> it can pass the data they are actually events in parent component output is recived in () this brackets
+
+
+    change detaction ->
+    it detaction when there is change in dom everytime so we can configure it according to our time
+    there are some change detection properties like onPush
+
+    @ViewChild ->
+    use case -> we have component but we dont have input and output properties , let say we have third party component on which we dont have controll at that
+    time for component comunication we use ViewChild
+
+    Dependency Injection ->
+    class based providers -> same as our java
+    value based providers -> we can pass object as service
+    factory based providers ->
+    services contains bussiness logic
+
+    Dependency Resolution ->
+    Related to @Injectable annotation over the service class when they say service provided in root they are saying service is registered in app.module
+    when we use service provided in root we get singleton reference across the project
+
+    Http and Observables ->
+    1. we have to import http module and register it on app-module.ts file
+
+    Observable and RXJS ->
+    Observable works like stream
+    subsribe method takes input as a observable type
+
+    
+
+
