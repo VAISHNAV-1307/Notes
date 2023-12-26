@@ -1,5 +1,0 @@
-React commands
-npx create-react-app appname => to create react app
-npm start => to start react app
-npm install react-router-dom =>npm install react-router-dom
-to install axios => npm install axios
