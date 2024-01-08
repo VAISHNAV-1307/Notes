@@ -68,7 +68,7 @@
     5. ngAfterContentChecked
     6. ngAfterViewInit -> It is used for ViewChild and we have to make {static : true} inside viewChild property
     7. ngAfterViewChecked
-    8. ngOnDestroy
+    8. ngOnDestroy -> used to unsubscibe the stream , here we describe the what action should be perform before destroing the component
 
     
     Component communication ->
@@ -98,11 +98,26 @@
 
     Http and Observables ->
     1. we have to import http module and register it on app-module.ts file
+    2. for apis in <> parenthesis ahead of http method we write the response type we are getting from that method
 
     Observable and RXJS ->
     Observable works like stream
     subsribe method takes input as a observable type
 
+    HttpRequest API ->
+    If we want more information in response that time we used httpRequest like headers and all
+    and at the end while using it we pass that created http request to the http client
+    if we have some api which takes more time at that time we use the httpRequest
+    it returns an event
+
+    RXJS operators ->
+    need -> it gives us stream of data which cannot be modified , it can be ,podified only within stream before subscribing so for modifing that data we use
+            RXJS operators, stream can be modified inside the function that is pipe, $ is used to denote the stream at the end of variable
+
+    1. shareReplay -> It caches the data , so we do not have to make an api call again and again
+
     
+
+
 
 
