@@ -1,0 +1,26 @@
+React
+
+npx
+It is npm package runner which gets installed when you installed node
+
+npm
+In this approach we installed the npm globally, and it is used to generate the packages
+
+File structure of React application
+1. package.json
+It contains the required dependencies and the scripts required for the project
+
+2. node_module -
+this is the folder in which all the dependencies are installed
+
+Components -
+It represent the part of user interface
+Root component are always App component
+Components are reusable, and can contain other components also
+component is placed in js or jsx file
+we have two types of components in react
+1. stateless functional component ->
+   these are js functions they return html
+   they can optionally receive an object of properties and returns html which describes an ui
+2. stateful class component
+   these are regular es6 classes that extend the component class from React library, they must contain the render method which intern return the html
