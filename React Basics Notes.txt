@@ -19,8 +19,121 @@ Root component are always App component
 Components are reusable, and can contain other components also
 component is placed in js or jsx file
 we have two types of components in react
-1. stateless functional component ->
+1. functional component ->
    these are js functions they return html
    they can optionally receive an object of properties and returns html which describes an ui
 2. stateful class component
    these are regular es6 classes that extend the component class from React library, they must contain the render method which intern return the html
+
+Functional Components ->
+These are the js functions which can optionally receive the properties as props as input and returns html(jsx)
+preferably we should use arrow functions for functional components
+
+Note -> If we export the component as a default component then we can import it with any name but path should be same
+        with the name export we have to import the component with the exact same name
+
+Class components->
+Class components are simple es6 classes same as functional components this can also receive input as properties and returns html as output
+class component can maintain private internal state which means it can maintain some information which is private to that component and use it to describe
+the user interface
+for the class component we need to compulsory import the component class and extend it, and we have to use render method from the component class to render
+the html
+
+Functional Components vs class components ->
+Functional ->
+Simple Functions
+Use as much as functional components
+absence of this keyword
+solution without having state
+
+Class ->
+More feature reach
+maintain their own private data - State
+can contain complex logics
+provide lifecycle hooks
+
+JSX ->
+it is an extension for js using which we can write the html in javascript code
+if we don't use jsx then code became to messy we have to use React.createElement method and crate html element one by one
+class rename by className
+for rename by htmlFor
+
+Props with functional components->
+props are key value pair which we can provide as input, it is the optional input. props are just an objects which we can pass from parent component to
+child component
+When we don't know what is coming from props at that time we can use children props , we can pass it between the parent component eg- <Greet><Child></Greet>
+
+props with class components->
+In class components props are available through this.props
+
+Note props - props are immutable
+
+State -> [We can influence components with state also]
+props vs state ->
+props -
+props are passed to the component
+these are the functional parameters
+props are immutable
+props - functional component
+this.props - class components
+
+
+state -
+state is and object which is privately managed within the component
+these are variables declared in function body
+state can be changed within the component
+useState hook - functional component
+this.state - class component
+
+Note - where we have a requirement where we need to change the passed data at that time we use state over the props
+
+state using class component ->
+1. use constructor to initialise the state
+2. use setState message to change the state
+if we directly modify the state without setState method then UI will not re-render on change of state and we can only initialise the state in constructor
+never modify the state directly
+calls to setState are asynchronous that why
+if we want some code to be executed only after state is changed , we have second parameter for setState method as callback function
+we can place the code which we want to be executed after the state change that code we can put into the callback function as a second parameter of setState
+method
+if we have to update the state based on previous state we have to pass function as an argument to the setState method instead of an object
+
+Destructuring props and state in React ->
+Destructuring is an ES6 feature which allows us to unpack the values from array , properties from objects into distinct variables
+it improves code readability
+
+In Functional Component
+there are two ways of destructuring props in functional components
+1. In the function parameter
+2. De-structure it in the function body
+
+In Class component
+we generally de-structure props or state in the render method
+object can contain as many properties, but we can de-structure only those which we want to use
+
+Events in React ->
+we use camelCase for events
+For Function
+we need event handler as a function and not the function call never add parenthesis
+
+For class components
+In class components handler methods are with this keyword
+
+Bind event handlers in react component
+when we have to use states with events in class components we have to bind the events otherwise this keywords value remains undefined
+we can bind the event in various ways
+1. bind keyword -> this cause component to re-render everytime it could be troubled in large application
+2. arrow function -> we have to call the event handler for this , this also has some performance implications for this
+3. Event binding in constructor -> this is official approach, cause binding only happens once in the constructor
+4. arrow function as class property -> means defining handler method in the arrow function instead of normal function, this is also official
+
+
+
+
+
+
+
+
+
+
+
