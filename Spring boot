@@ -1,0 +1,470 @@
+
+                                                                     || जय शंकर ||
+
+# Maven
+- It is a dependency management tool
+
+# POM [project object model]
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Spring ->
+- Spring Framework is a powerful, lightweight, and open-source Java framework used to build enterprise-level applications easily.
+- It provides comprehensive infrastructure support for developing Java applications.
+- Spring framework is strongly dependent on IOC
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# IOC [Inversion of control]
+ - IOC is a principle where we allow some of our dependencies, spring in our case, to control the logic in our application
+ - It will control the application in the way we provide the instructions for controlling the application
+ - We need to provide the instructions what things it should manage and how it should manage
+ - In spring IOC is divided in two main ways
+    -> Dependency Injection - Its a approach where framework is controlling the links between your application
+                            - When an object have a dependency over another object at that time you allow the framework to manage the dependency for you
+                            - so its an IOC cause spring controlling an dependency of objects for us
+    -> AOP [Aspects] - The parts which controls intercepting and method execution
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Context
+- The spring needs to know which are the objects in your application, you need to manage by spring and that's where context came into picture
+- Its a bucket where we will have the instances of classes which we can use in the application
+- Context is the place where we put the instances of object, that we allow spring to manage
+- All the instances have the unique identifier we can have aliases [but we didn't use aliases that much]
+- One of the implementations of context is AnnotationConfigApplicationContext(), its a spring implementation which allows you to define the context based
+  on annotations
+- Syntax -> var context = new AnnotationConfigApplicationContext();
+            var context = new AnnotationConfigApplicationContext(Class c);
+- So we can provide the instructions for context in the configuration class, and pass the config class to context in the constructor
+- to make any class as configuration we need to add @Configuration annotation on top of it
+- so with the help of annotations we can tell the spring the purpose of the class , by @Configuration annotation we can tell the spring that the class
+  annotated with the @Configuration annotation is not an ordinary class but it is used to define the configurations
+
+- Beans -> Beans are simple objects
+- Types of Beans -> Singleton Beans and Prototype Beans
+- Defining Beans in the context
+    - a. Creating beans with methods
+      1. In the config class we can create a methods with the @Bean annotation which will return an instance of the class of which we want to get from the
+      context, the name of method from which we are returning the instance will be the unique identifier for that bean or to get the bean from context.
+      2. so when we ask for the context to context.getBean(xyz.class); now context will check that does context have the bean of that type and if he has
+      it will return the bean from the specified method, otherwise it will throw an exception
+      3. If we have many beans for the same class then we need to provide the name of bean which we want to get from the context
+      example -> LoginController bean = context.getBean("loginController1", LoginController.class);
+      4. We can create a beans with methods having parameters usually used for the autowiring
+
+    - b. Creating beans with stereotype annotations
+      1. We need to add @Component annotation at the top of class of which we need a bean to be created in the context
+      2. but by default spring is not looking for this kind of annotations
+      3. so on the config class we need to define @ComponentScan(basePackages = "path of directory from which all components should get scanned")
+      4. by using stereotype annotations we cannot create bean of same type multiple times
+      5. By using stereotype annotations we can create the bean of user define class only not of predefined classes
+      6. We should prefer the stereoType annotations for all the cases except above two
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Controller -> It is the class where we define endpoint, means http methods and path which will allow specific use case behind the scene implementing in the
+              service class.
+Repository -> The objects which allows us to manage the DB operations, we need to write it the queries.
+Model      -> The objects which describes the data, we used it to map with the table
+Service    -> The objects where main operation logic is written
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Dependency Injection -> Taking a fields from the context and using them into another classes
+- We can say we can achieve IOC from DI over variables
+- There are three ways for the Dependency Injection
+1. using field injection
+    -> We can add @Autowired annotation on top of field name which we want to get bean [not recommended]
+    -> If we use the field injection then instance remain mutable which can get modified further in the code so that's why it is not recommended
+    -> Recommended to used in unit test cases
+    -> It used the java default constructor for creating the objects, then using reflection we can see which are the fields in the class which are the
+       constructors in the class and by simply parsing them it takes decision based on that
+2. using constructor based DI [Most Recommended approach]
+    -> Declaring the field as private final and initialising it in the constructor and then providing @Autowired annotation on the constructor
+       and not on the field [this is a recommended approach cause it can keep the attributes immutable]
+    -> from spring 5 we don't even need to provide the @Autowired annotation on top of constructor, spring will know that if we are asking the instance in the
+       constructor then take it from the context and provide it in the constructor.
+    -> But it will work without the @Autowired annotation only when we have the only one constructor in the class, so if we have more than one constructor then
+       explicitly we have to tell the spring to use which constructor for the DI
+3. using getter setter based DI
+    -> Declare the field and create getter and setter for the field and then provide an @Autowired annotation on top of setter method
+    -> But this also does not solves the problem as field remains mutable so its always recommended to use constructor based DI
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@Qualifier annotation
+- Let say we have two beans of same class and we are autowiring that beans in the different class at that time how spring will know which instance to call
+- that time @Qualifier annotation comes into picture , we can give that annotation on top of bean method its a basically name for the instance
+- and then we can give the same @Qualifier annotation after the @Autowired annotation on the field with the required bean name as input to the @Qualifier
+  annotation
+- If we are using @Component annotation and creating bean from that at that time we can give the @Qualifier annotation on the class level
+
+@Primary annotation
+- Lets say we have the multiple beans and then we need to specify which bean should be get called by default at that time we can use the @Primary annotation
+  on top of bean method or if we are using @Component annotation on class level over there
+
+# Note -> if we have multiple beans then in that case use of any one annotation @Qualifier or @Primary is mandatory
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Circular dependency issue ->
+- Circular dependency issue happens when you have two objects referring each other
+- example -> service1 injects service2 and service2 injects service1
+- so when we are using constructor based DI , when we are asking the object of service1 it required the obj of service2 for initialisation so spring checks
+  in the context that do we have the object of service2 , but service2 obj requires the obj of service1 , this is called circular dependency issue
+- The solution for circular dependency is to decouple the responsibilities
+- Means create the new class and used it in the both the classes which are dependent one another and vise versa
+- We shouldn't solve the circular dependency by using the field injection it will work technically but will cause the bigger problem than circular dependency
+- The only real solution is creating the new class and used that class in the classes where we are facing the circular dependency
+
+Note -> for DI please refer to the spring-practice-DI project
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Aspects
+- Aspects deals with controlling method execution
+- Its a IOC for the method execution
+- Its a way spring can alter your method execution
+- It is a piece of logic which stays in between caller and the object that has been called and can alter the execution of method
+- It is a logic which will be executed when a specific method is called, to create such a class we need to annotate it with the @Aspect annotations
+- @Aspect is not a stereotype annotation, so it will not create a bean in the context, so to create the bean of such class we need to explicitly annotate it
+  with the @Component annotation or need to create a bean method in the config class
+- So in the aspects class we write the methods which should get executed before or after or other scenarios of methods, so we need to tell the spring
+  aspect method should get executed around which method by the syntax
+- for enabling aspects we need to annotate the config class with @EnableAspectJAutoProxy, the methods will get executed normally if we did not used this
+  annotation
+- so when we are using the aspects and write the aspects logic over the some method and called that method through an object at that time we did not get
+  the real object of class containing the called method but we get the modified object by spring , spring wrapped that original object and provide us
+  the wrapped object
+- caller object -> Proxy object created by spring which can alter the method execution -> object to be called
+- so this way aspects can alter the method execution
+- Syntax -> //JOINPOINT
+            @Before("execution(* controllers.DemoController.doubleValue(..))") //POINTCUT
+            public void before(){
+                //ASPECT
+                System.out.println("HELLO");
+            }
+            Here -> Before is a join point
+                 -> the input to before is the method described which we want to intercept its called as point cut
+- JoinPoints in the aspects
+    @Before -> Execute before method execution
+    @After -> Execute after method execution
+    @AfterReturning -> Executes only if method doesn't throw an exception
+    @AfterThrowing -> Executes only if exception is thrown
+    @Around -> this is most powerful which can be used to wrap the complete method execution, it should be the last approach , only used it when we cannot
+               use the first four approaches, around can work for any of the four
+               - for use of around we need to have the input parameter which is instance of ProceedingJoinPoint
+               - Example -> @Around("execution(* controllers.DemoController.doubleValue(..))")
+                                public void around(ProceedingJoinPoint pjp) throws Throwable {
+                                    System.out.println(":)");
+                                    pjp.proceed();
+                                    System.out.println(":(");
+                                }
+                                Here -> pjp.proceed() method is calling the method which we described in the pointcut
+                                        we can provide input also to the proceed method its take the object of arrays as an input
+                                        If we didn't use the proceed method then main logic is replaced by the logic return in the around method
+
+Note -> for aspects please refer to the spring-practice-aspects project
+
+Singleton and Prototype beans ->
+- In real world application we most of the times used singleton beans, spring by default provides us a singleton beans
+- We can use the prototype beans as well in the spring by defining the scope of beans for that we need to use @Scope("prototype") annotation,
+  so when we request the bean from context we will get the new instance of the specified class
+- If we create the instance using new keyword then that instance will not be known to the spring context and if in that object you cannot use any
+  functionality of spring like DI, aspects
+- Singleton bean has a eagar instantiation which means when context , singleton beans are also created with it, we can change that behavior by using
+  @Lazy annotation after the @Component annotation , so by using lazy annotation we can tell the spring create the object only when we have asked
+  for it
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Spring boot
+- It works on convection over configuration
+- which means spring boot will work on preconfigured stuff which is mainly expected in majority of cases
+- Spring boot provides so many things preconfigured and we can configured it according to our requirements
+- In spring boot convention is a first step and configuration can be second step if its needed
+- The large part of configuration which we need to do in the spring is taken care by spring boot
+- It just a simple maven project which comes with few things pre-created like essential dependencies in pom.xml, the SpringApplication.run(Main.class, args)
+  method in main class
+- run method it helps you to create the context and configuration behind the scenes
+- @SpringBootApplication annotation on the main class is a wrapper annotation over the multiple annotations which are required for the configurations
+- Spring boot provides and functional application that starts and behind the scene configures and boots servlet container which is a tomcat
+- We just need to start the application and behind the scene we have the tomcat server configured and the whole spring mvc architecture
+- Spring Boot is a framework built on top of the Spring Framework that simplifies the process of building production-ready Spring applications quickly and
+  easily.
+
+---
+
+- Tomcat -> we need a tomcat in web app to receive Http request and return the Http response and tomcat is a translator between Http and our application
+- So in the ancient times before the spring boot we need to configure the tomcat in a way that it receives the http request and send it to the desired
+  servlet where business logic for that particular request is written and then after performing the operations in the servlet tomcat again returns the
+  response to that desired path
+- now we have the only one servlet which is called the dispatcher servlet, tomcat de-coupled from the app logic, so now whatever request comes it is send
+  to the dispatcher servlet or we called it as the front controller, and front controller is responsible to deliver the request based on the capability
+- so instead of having tomcat for managing the servlets and being responsible for path and being responsibilities in terms of app logic, it will send the
+  request to the dispatcher servlet and dispatcher servlet ending up delivering the requests whom is responsible to executing the logic and sending the
+  response back through tomcat
+- from dispatcher servlet request goes to the Handler Mapping and dispatcher servlet asks the Handler Mapping where this request should go to which
+  controller and then Handler Mapping provides the mapping for request and controller then dispatcher servlet calls the respective controller and then
+  after the execution of controller action , the controller provides back the response which should be render, the dispatcher servlet takes that response
+  and finds the view and render the given response from the controller, to find the view to be render dispatcher servlet uses a component named view
+  resolver and then dispatcher servlet put everything together and send it back to the tomcat
+- so we moved the responsibility from tomcat to our application and tomcat is being simple translator now, which simplified the design a lot
+
+---
+
+application.properties file
+- We used this file to describe the environment specific properties
+- We can have as much as properties file , we can have separate properties file for every environment
+- For the env specific property file we can have it as application-dev.properties and in the VM options we can provide -Dspring.profiles.active=dev
+  then when we run the application it will pick up the properties in application-dev.properties, if we do not -Dspring.profiles.active=dev this it will
+  take the default property file
+- and if we do not have any specified property in the env specific property file then it will take that property from default property file
+
+---
+
+HikariDataSource -> It is the convection used by springboot to have a connectivity with the datasource
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Rest apis
+- A REST API (Representational State Transfer) is a web service that:
+  Uses HTTP methods (GET, POST, PUT, DELETE) for CRUD operations
+  Returns data mostly in JSON format
+
+- Annotations in Spring Boot for REST APIs
+1. @RestController
+Combination of @Controller + @ResponseBody
+Marks a class as a REST controller where each method returns a domain object instead of a view.
+
+2. @RequestMapping
+Used at class or method level to map HTTP requests to handler methods.
+
+3. @GetMapping
+Shorthand for @RequestMapping(method = RequestMethod.GET).
+Used for GET requests (reading data).
+
+4. @PostMapping
+Shorthand for @RequestMapping(method = RequestMethod.POST).
+Used for POST requests (creating data).
+
+5. @PutMapping
+Shorthand for @RequestMapping(method = RequestMethod.PUT).
+Used for updating existing resources.
+
+6. @DeleteMapping
+Shorthand for @RequestMapping(method = RequestMethod.DELETE).
+Used for deleting resources.
+
+----
+
+# Handling Requests in REST apis
+1. Request Parameters
+- They are query parameters passed in the URL after ?.
+- Example -> http://localhost:8080/api/users?name=vaishnav&age=23
+- @RequestParam maps query parameters to method parameters.
+
+2. Path Variables
+- They are dynamic parts of the URL path.
+- Example -> http://localhost:8080/api/users/5
+- Here, 5 is a path variable (e.g., user id).
+- @PathVariable maps URL segments to method parameters.
+
+3. Request Bodies
+- The entire JSON data sent in POST or PUT requests.
+- @RequestBody maps incoming JSON data to a Java request object.
+
+----
+
+# Handling responses in Rest apis
+- Status codes communicate the result of client requests clearly.
+- They are REST API standards, improving readability, debugging, and client handling.
+- If we simply return an object or string, Spring Boot automatically returns:
+  200 OK for successful GET/POST requests
+- We can use ResponseEntity for Returning responses in Rest apis
+- Response entity allows up sending Http status code, setting Response Body and setting Http Headers
+- Codes start with the 2xx represent the success message, code starts with the 4xx represent the client side error, code starts with the 5xx represents
+  server side issue
+- Most commonly used in Spring Boot REST APIs
+    200 OK – successful GET, PUT
+    201 Created – successful POST creating a resource
+    204 No Content – successful DELETE
+    400 Bad Request – client-side invalid data
+    401 Unauthorized – authentication needed
+    403 Forbidden – insufficient permissions
+    404 Not Found – resource missing
+    409 Conflict – duplicate or conflicting request
+    500 Internal Server Error – unexpected server failure
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Calling external apis from spring boot application
+
+1. Rest Template
+RestTemplate is a synchronous HTTP client provided by Spring to:
+ - Consume REST web services easily.
+ - Perform GET, POST, PUT, DELETE operations.
+ - Convert JSON/XML responses to Java objects using HttpMessageConverters internally (Jackson for JSON).
+- Commonly used restTemplate method
+    | Method                               | Purpose                                                     |
+    | ------------------------------------ | ----------------------------------------------------------- |
+    | `getForObject(url, class)`           | GET request, returns response mapped to class               |
+    | `getForEntity(url, class)`           | GET request, returns ResponseEntity (status, headers, body) |
+    | `postForObject(url, request, class)` | POST request, returns mapped response                       |
+    | `postForEntity(url, request, class)` | POST request, returns ResponseEntity                        |
+    | `put(url, request)`                  | PUT request, no response body                               |
+    | `delete(url)`                        | DELETE request                                              |
+    | `exchange()`                         | Flexible method for any HTTP method with full control       |
+    | `execute()`                          | Lowest-level method for advanced use cases                  |
+
+# restTemplate.exchange()
+- exchange() is the most powerful method of RestTemplate, providing full control over HTTP requests and responses.
+- When we need to set headers, HTTP method, request entity, use exchange().
+- It allows you to:
+    Specify HTTP method (GET, POST, PUT, DELETE, etc.)
+    Set custom headers
+    Send request body
+    Specify response type
+    Handle full ResponseEntity (status code, headers, body)
+- Example -> @GetMapping("/consume-exchange")
+             public String consumeApiExchange() {
+                 String url = "https://jsonplaceholder.typicode.com/posts/1";
+
+                 HttpHeaders headers = new HttpHeaders();
+                 headers.set("Accept", "application/json");
+
+                 HttpEntity<String> entity = new HttpEntity<>(headers);
+
+                 ResponseEntity<String> response = restTemplate.exchange(
+                         url,
+                         HttpMethod.GET,
+                         entity,
+                         String.class
+                 );
+
+                 System.out.println("Status: " + response.getStatusCode());
+                 System.out.println("Headers: " + response.getHeaders());
+
+                 return response.getBody();
+             }
+             Here -> HttpEntity<String> entity = new HttpEntity<>(headers);
+                     Creates request with custom headers and no body.
+                     exchange() sends GET request with these headers and maps response to String.
+
+2. Web client ->
+- Supports asynchronous and reactive streams
+- More flexible and powerful than RestTemplate
+- Suitable for microservices communication with high concurrency
+- Example -> Get Request
+             @RestController
+             @RequestMapping("/api")
+             public class ConsumeController {
+
+                 @Autowired
+                 private WebClient.Builder webClientBuilder;
+
+                 @GetMapping("/consume")
+                 public Mono<String> consumeApi() {
+                     return webClientBuilder.build()
+                             .get()
+                             .uri("https://jsonplaceholder.typicode.com/posts/1")
+                             .retrieve()
+                             .bodyToMono(String.class);
+                 }
+             }
+             Here -> .get() → HTTP GET
+                     .uri() → target URL
+                     .retrieve() → initiates request and prepares for response handling
+                     .bodyToMono(String.class) → converts response body to Mono<String>
+
+- Example -> Post request
+             @PostMapping("/create-post")
+             public Mono<Post> createPost(@RequestBody Post post) {
+                 return webClientBuilder.build()
+                         .post()
+                         .uri("https://jsonplaceholder.typicode.com/posts")
+                         .body(Mono.just(post), Post.class)
+                         .retrieve()
+                         .bodyToMono(Post.class);
+             }
+             Here -> .body(Mono.just(post), Post.class) → sets request body
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Scheduling & Asynchronous Tasks
+1. @Scheduled
+- Annotation used to schedule methods to run at fixed intervals or cron expressions.
+-  Enables running periodic tasks like:
+    . Sending emails every hour
+    . Database clean-up jobs daily
+    . Batch data processing
+
+2. @Async
+- Runs a method in a separate thread asynchronously, allowing:
+    . Non-blocking calls
+    . Parallel processing without waiting for completion
+- Calling asyncTask() returns immediately, task continues in a separate thread.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Spring Boot Best Practices
+1. Layered Architecture
+- Follows separation of concerns by dividing code into specific layers:
+    | Layer      | Responsibility                        |
+    | ---------- | ------------------------------------- |
+    | Controller | Handles HTTP requests and responses   |
+    | Service    | Contains business logic               |
+    | Repository | Data access layer interacting with DB |
+- From this approach we can achieve
+    . Better readability
+    . Easy to test each layer independently
+    . Scalable as the project grows
+
+2. Exception Handling Strategy
+- Provides consistent, meaningful error responses to clients.
+- Avoids exposing stack traces or internal logic.
+- We can achieve it through @ControllerAdvise
+- Use custom exception classes like ResourceNotFoundException, InvalidRequestException.
+- Return standard error structures with timestamp, message, status code for API consumers.
+
+3. Externalised Configurations
+- Keeps configurations outside code for easy change across environments (dev, QA, prod).
+- Never hardcode credentials; use environment variables or vaults.
+- Make the separate config files per environment (application-dev.yml, application-prod.yml).
+
+4. Clean Code & SOLID Principles
+- SOLID Principles
+    | Principle             | Meaning                                      |
+    | ----------------------| -------------------------------------------- |
+    | Single Responsibility | One class → one responsibility               |
+    | Open/Closed           | Open for extension, closed for modification  |
+    | Liskov Substitution   | Subtypes replace base types without breaking |
+    | Interface Segregation | Many small interfaces over one fat interface |
+    | Dependency Inversion  | Depend on abstractions, not concrete classes |
+
+
+- Clean Code Practices
+    . Use meaningful method and variable names
+    . Avoid large classes (split into focused components)
+    . Write unit tests
+    . Remove dead code and commented-out blocks
+    . Follow Controller → Service → Repository flow
+
+5. Versioning REST APIs
+- Versioning apis supports backward compatibility while adding new features.
+- Most commonly used is URI Versioning
+- Example ->
+             @RequestMapping("/api/v1/users")
+             public class UserControllerV1 { }
+
+             @RequestMapping("/api/v2/users")
+             public class UserControllerV2 { }
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+

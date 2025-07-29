@@ -1,0 +1,1097 @@
+
+                                                                       || जय शंकर ||
+
+JPA -> Java Persistence API
+- JPA is a Java specification (interface and rules) that defines how to map Java objects (entities) to database tables, and how to manage them
+  (CRUD, queries, transactions).
+- It is only a specification, not an implementation.
+- It is like an interface in Java – it defines what needs to be done, but not how.
+- Earlier, developers used JDBC directly, writing lots of SQL code manually. To simplify this, ORM frameworks like Hibernate were created, and later JPA
+  was introduced as a standard API for ORM in Java.
+- Common implementations:
+    . Hibernate
+    . EclipseLink
+    . OpenJPA
+    . Hibernate is the most popular JPA implementation, and Spring Boot uses Hibernate by default under the hood
+- JPA provides the following features
+    . Mapping Java classes to DB tables (via annotations like @Entity, @Table)
+    . Managing database CRUD operations without writing SQL directly
+    . Managing relationships (OneToMany, ManyToOne, etc.)
+    . Querying using JPQL (Java Persistence Query Language)
+    . Transaction management with EntityManager
+- JPA Annotations
+    | Annotation                                             | Purpose                                                                 |
+    | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+    | `@Entity`                                              | Marks a class as a JPA entity (maps to a table)                         |
+    | `@Table`                                               | Maps to a specific table name (optional if table name = class name)     |
+    | `@Id`                                                  | Primary key field                                                       |
+    | `@GeneratedValue`                                      | Auto-generates primary key (strategy options: AUTO, IDENTITY, SEQUENCE) |
+    | `@Column`                                              | Maps a field to a specific column (optional if names match)             |
+    | `@OneToOne`, `@OneToMany`, `@ManyToOne`, `@ManyToMany` | Relationships mapping                                                   |
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Hibernate
+- Hibernate is a Java-based ORM (Object Relational Mapping) framework. It implements the JPA specification and provides additional features to map Java
+  objects (entities) to relational database tables seamlessly.
+- In simple words Hibernate automates the old JDBC work – managing connections, creating SQL queries, handling result sets, mapping data to objects,
+  etc.
+- Core concepts in Hibernate
+    | Concept        | Explanation                                                                                                   |
+    | ---------------| ------------------------------------------------------------------------------------------------------------- |
+    | SessionFactory | Heavy-weight object created once during app startup, to manage database connections.                          |
+    | Session        | Represents a single unit of work with the database (a wrapper around JDBC connection).                        |
+    | Transaction    | Manages commit and rollback operations within a session.                                                      |
+    | Entity         | Java class mapped to a database table.                                                                        |
+
+- Advantages of Hibernate
+    . Simplifies database operations (no direct JDBC boilerplate)
+    . Automatic table creation (if configured)
+    . Database independence (switch DB easily)
+    . Powerful caching mechanism (1st and 2nd level)
+    . Manages relationships and cascades automatically
+
+Example -> Hibernate without using spring
+    Session session = sessionFactory.openSession();
+    Transaction tx = session.beginTransaction();
+
+    Student student = new Student();
+    student.setName("Vaishnav");
+    student.setEmail("test@gmail.com");
+
+    session.save(student);
+    tx.commit();
+    session.close();
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+EntityManager
+- EntityManager is the main interface in JPA for interacting with the persistence context. It manages:
+    . Saving entities to DB
+    . Updating entities
+    . Deleting entities
+    . Querying entities
+- It is gateway to the database when using JPA.
+
+- Key responsibilities of EntityManager
+    . Persisting new entities (persist)
+    . Finding entities by primary key (find)
+    . Updating entities (automatic if managed)
+    . Removing entities (remove)
+    . Query execution (JPQL or Native SQL)
+    . Managing the persistence context
+
+- Core Methods
+    | Method                          | Purpose                                                |
+    | ------------------------------- | ------------------------------------------------------ |
+    | `persist(entity)`               | Inserts a new entity into the database                 |
+    | `find(entityClass, primaryKey)` | Finds an entity by primary key                         |
+    | `merge(entity)`                 | Updates an existing entity or saves if detached        |
+    | `remove(entity)`                | Deletes an entity                                      |
+    | `createQuery()`                 | Creates a JPQL query                                   |
+    | `createNativeQuery()`           | Creates a native SQL query                             |
+    | `flush()`                       | Synchronises persistence context with database         |
+    | `clear()`                       | Clears the persistence context (detaches all entities) |
+    | `close()`                       | Closes the EntityManager                               |
+
+# Note -> flush forces synchronisation with DB before transaction commit.
+
+Entity Lifecycle with EntityManager
+Transient – New object, not associated with EntityManager.
+Persistent – Managed by EntityManager (after persist or find).
+Detached – Previously persistent, now not managed (EntityManager closed or cleared).
+Removed – Marked for deletion using remove.
+
+Example ->
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
+    EntityManager em = emf.createEntityManager();
+
+    em.getTransaction().begin();
+
+    Student student = new Student();
+    student.setName("Vaishnav");
+    student.setEmail("test@gmail.com");
+
+    em.persist(student); // inserts into DB
+
+    Student s = em.find(Student.class, 1L); // retrieves by primary key
+
+    em.getTransaction().commit();
+    em.close();
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Persistence Context
+- A set of managed entity instances in which for any persistent entity identity, there is a unique entity instance.
+- In simple words it is like a cache or memory area managed by EntityManager. When you Fetch an entity, it is stored in persistence context or Any changes
+  to it are tracked automatically until transaction commit.
+- Persistence Context is a set of entity instances where:
+    . Each entity is unique per database identity (primary key).
+    . Managed by EntityManager.
+    . Tracks changes to entities automatically.
+- It is like a first-level cache maintained by EntityManager to manage entities within a transaction or session.
+- Persistence Context = First-level cache + identity manager + change tracker.
+- Why is Persistence Context important?
+    . Ensures identity guarantee: same entity is never loaded twice within the context.
+    . Automatically tracks changes to managed entities – updates are flushed to DB at transaction commit.
+    . Avoids unnecessary DB calls by storing fetched entities in memory.
+    . Provides transactional write-behind: updates happen at commit, not immediately (unless flushed manually).
+- Example
+    em.getTransaction().begin();
+
+    Student s1 = em.find(Student.class, 1L); // fetches from DB, stores in Persistence Context
+    Student s2 = em.find(Student.class, 1L); // fetched from Persistence Context, no DB hit
+
+    s1.setName("Vaishnav Updated"); // updates tracked automatically
+
+    em.getTransaction().commit(); // flushes changes to DB
+
+    em.close(); // clears Persistence Context
+    Here -> First find hits DB and stores Student(1L) in context.
+            Second find returns from context (cache).
+            Updating s1 is tracked.
+            On commit, changes are flushed to DB.
+            close() clears context.
+
+States of Entities in Persistence Context
+| State      | Explanation                                                                         |
+| -----------| ----------------------------------------------------------------------------------- |
+| Transient  | New object not associated with any persistence context (e.g., `new Student()`)      |
+| Persistent | Managed by EntityManager and Persistence Context (`em.persist()`, `em.find()`)      |
+| Detached   | Was persistent but no longer associated (after `em.close()` or outside transaction) |
+| Removed    | Marked for deletion (`em.remove()`), will be deleted upon flush/commit              |
+
+Persistence Context Scope
+- Types:
+    1. Transaction-scoped (default in JPA):
+    . Exists within a transaction.
+    . Starts with em.getTransaction().begin() and ends with commit or rollback.
+    2. Extended-scoped (used in Stateful EJBs):
+    . Exists beyond a single transaction.
+    . Useful for long conversations in applications (less common in Spring).
+
+Persistence Context vs Cache
+    | Aspect         | Persistence Context                    | Cache (2nd level)                         |
+    | ---------------| -------------------------------------- | ----------------------------------------- |
+    | Scope          | Per EntityManager / transaction        | Application-wide (SessionFactory)         |
+    | Level          | First-level cache (mandatory)          | Second-level (optional)                   |
+    | Usage          | Ensures consistency within transaction | Reduces DB calls across transactions      |
+    | Implementation | JPA specification                      | Hibernate specific (Ehcache, Redis, etc.) |
+
+Basic CRUD operations in EntityManager
+    | Operation  | Method                                         | Notes                        |
+    | ---------- | ---------------------------------------------- | ---------------------------- |
+    | Create     | `persist(entity)`                              | Adds new entity to DB        |
+    | Read       | `find(entityClass, primaryKey)`                | Fetches entity by ID         |
+    | Update     | Auto for managed, `merge(entity)` for detached | Tracks changes automatically |
+    | Delete     | `remove(entity)`                               | Deletes entity from DB       |
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Spring Data JPA
+- Spring Data JPA is a part of the Spring Data project that simplifies the implementation of data access layers using JPA.
+- It is a library built on top of JPA and Hibernate to reduce boilerplate code needed to perform database operations.
+- Before Spring Data JPA, using JPA involved:
+  Writing an interface (DAO)
+  Writing its implementation class
+  Injecting EntityManager
+  Implementing CRUD methods manually
+- Spring Data JPA removes this hassle by:
+  Providing ready-made repository interfaces with built-in CRUD, paging, and sorting methods.
+  Allowing automatic query generation by defining method names (e.g. findByName).
+  Supporting custom queries using @Query easily.
+  Integrating seamlessly with Spring Boot for auto-configuration.
+- Core features of Spring Data JPA:
+    Repository Abstraction:
+        Use interfaces like CrudRepository, JpaRepository without writing implementation code.
+    Derived Queries:
+        Write methods like findByEmail and Spring Data JPA generates SQL behind the scenes.
+    Custom Queries with @Query:
+        Define JPQL or native queries for complex scenarios.
+    Paging and Sorting:
+        Built-in support for pagination and sorting results efficiently.
+    Specifications:
+        Create dynamic queries using the Specification API.
+- Application properties configured for spring data jpa setup
+    # ==============================
+    # Database Configuration
+    # ==============================
+    spring.datasource.url=jdbc:mysql://localhost:3306/your_db_name
+    spring.datasource.username=root
+    spring.datasource.password=your_password
+    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+    # ==============================
+    # JPA & Hibernate Configuration
+    # ==============================
+    spring.jpa.hibernate.ddl-auto=update
+    spring.jpa.show-sql=true
+    spring.jpa.properties.hibernate.format_sql=true
+
+    # Optional: specify dialect explicitly
+    spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+
+    Explanation
+    | Property                                    | Purpose                                                                            |
+    | --------------------------------------------| ---------------------------------------------------------------------------------- |
+    | spring.datasource.url                       | DB connection URL                                                                  |
+    | spring.datasource.username/password         | DB credentials                                                                     |
+    | spring.datasource.driver-class-name         | JDBC driver class                                                                  |
+    | spring.jpa.hibernate.ddl-auto               | Schema generation strategy (`none`, `update`, `create`, `create-drop`, `validate`) |
+    | spring.jpa.show-sql                         | Prints SQL queries in console for debugging                                        |
+    | spring.jpa.properties.hibernate.format\_sql | Pretty prints SQL                                                                  |
+    | spring.jpa.database-platform                | Specifies Hibernate dialect (optional; auto-detected if omitted)                   |
+
+    ddl-auto options (important)
+    | Option      | Behavior                                                              |
+    | ------------| --------------------------------------------------------------------- |
+    | none        | No schema management                                                  |
+    | update      | Updates existing schema without dropping data (common in development) |
+    | create      | Creates schema every startup (drops if exists)                        |
+    | create-drop | Creates schema at startup, drops it at shutdown                       |
+    | validate    | Validates schema against entities (throws error if mismatch)          |
+
+- Repository Abstraction
+- Spring Data JPA provides ready-made interfaces for CRUD operations, eliminating the need to write boilerplate DAO implementations manually.
+    1. CrudRepository : CrudRepository is a generic Spring Data interface that provides CRUD (Create, Read, Update, Delete) operations for an entity.
+         - Part of org.springframework.data.repository package
+         - Uses generics to work with any entity type
+         - Extended by JpaRepository and other repository types
+         - CrudRepository Interface Declaration
+            public interface CrudRepository<T, ID> extends Repository<T, ID> {
+                <S extends T> S save(S entity);
+                Optional<T> findById(ID id);
+                boolean existsById(ID id);
+                Iterable<T> findAll();
+                Iterable<T> findAllById(Iterable<ID> ids);
+                long count();
+                void deleteById(ID id);
+                void delete(T entity);
+                void deleteAll(Iterable<? extends T> entities);
+                void deleteAll();
+            }
+            Here - T: Entity type
+                   ID: Type of primary key
+
+    2. PagingAndSortingRepository : PagingAndSortingRepository is a Spring Data interface that extends CrudRepository and provides additional methods for
+                                    pagination and sorting.
+        - It is used When we want to retrieve a large number of records efficiently with:
+          Pagination: Fetch data in pages (e.g. page 0 with 10 records, page 1 with next 10).
+          Sorting: Retrieve data sorted by specific fields (e.g. name ascending, date descending).
+        - Interface Declaration
+            public interface PagingAndSortingRepository<T, ID> extends CrudRepository<T, ID> {
+                Iterable<T> findAll(Sort sort);
+                Page<T> findAll(Pageable pageable);
+            }
+            Here - T: Entity type
+                   ID: Primary key type
+                   findAll(Sort sort): Returns all entities sorted by given criteria
+                   findAll(Pageable pageable): Returns entities in a paginated form (Page object)
+
+            Pageable and Page
+            - | Term     | Explanation                                                                                                  |
+              | ---------| -------------------------------------------------------------------------------------------------------------|
+              | Pageable | Interface representing pagination information (page number, size, sort). Implemented by PageRequest.         |
+              | Page<T>  | Represents a single page of results, including content, total elements, total pages, current page info, etc. |
+
+            - Example -> @Service
+                         public class StudentService {
+
+                             @Autowired
+                             private StudentRepository studentRepository;
+
+                             public Iterable<Student> getAllStudentsSorted() {
+                                 return studentRepository.findAll(Sort.by("name").ascending());
+                             }
+
+                             public Page<Student> getStudentsPaginated(int pageNo, int pageSize) {
+                                 Pageable pageable = PageRequest.of(pageNo, pageSize);
+                                 return studentRepository.findAll(pageable);
+                             }
+                         }
+
+    3. JpaRepository : JpaRepository is a Spring Data JPA interface that extends PagingAndSortingRepository and adds additional JPA-specific methods.
+        - Hierarchy : JpaRepository
+                         ↑
+                      PagingAndSortingRepository
+                         ↑
+                      CrudRepository
+                         ↑
+                      Repository
+        - JpaRepository inherits CRUD + Paging + Sorting and adds JPA-specific features for better productivity.
+        - Provides all CRUD operations (from CrudRepository)
+          Supports Paging and Sorting (from PagingAndSortingRepository)
+          Adds extra JPA operations, such as :
+          | Method                                | Purpose                                                                  |
+          | ------------------------------------- | ------------------------------------------------------------------------ |
+          | `saveAll(Iterable<S> entities)`       | Saves multiple entities in a batch                                       |
+          | `flush()`                             | Flushes changes in persistence context to DB                             |
+          | `saveAndFlush(entity)`                | Saves entity and immediately flushes changes                             |
+          | `deleteInBatch(Iterable<T> entities)` | Deletes multiple entities in a batch                                     |
+          | `deleteAllInBatch()`                  | Deletes all entities in a batch                                          |
+          | `getOne(ID id)`                       | Returns a reference (proxy) to the entity without hitting DB immediately |
+
+        -  JpaRepository Interface Declaration
+            public interface JpaRepository<T, ID> extends PagingAndSortingRepository<T, ID> {
+                List<T> findAll();
+                List<T> findAll(Sort sort);
+                List<T> findAllById(Iterable<ID> ids);
+                <S extends T> List<S> saveAll(Iterable<S> entities);
+                void flush();
+                <S extends T> S saveAndFlush(S entity);
+                void deleteInBatch(Iterable<T> entities);
+                void deleteAllInBatch();
+                T getOne(ID id);
+            }
+        - Important Points
+          . getOne(id) returns a lazy-loaded proxy; accessing properties triggers DB hit.
+          . findById(id) retrieves entity immediately from DB.
+          . Use saveAll() and deleteInBatch() for performance in bulk operations.
+          . flush() writes pending changes in persistence context to DB without committing the transaction.
+        - JpaRepository is the most powerful repository interface, combining :
+          . CRUD operations
+          . Paging & Sorting
+          . Additional JPA-specific methods for batch processing and flushing
+
+- Differences: CrudRepository vs PagingAndSortingRepository vs JpaRepository
+    | Interface                  | Features                                                                                       |
+    | ---------------------------| -----------------------------------------------------------------------------------------------|
+    | CrudRepository             | Basic CRUD operations                                                                          |
+    | PagingAndSortingRepository | CRUD + Paging + Sorting                                                                        |
+    | JpaRepository              | CRUD + Paging + Sorting + JPA-specific methods (batch operations, flush, saveAndFlush, getOne) |
+
+- When to use each ?
+1. CrudRepository
+    . You only need basic CRUD operations
+    . No requirement for pagination or sorting
+    . Example: Small admin configurations table CRUD
+    . Avoid if you plan to add pagination or JPA-specific operations later, as you’ll need to change interface extension.
+
+2. PagingAndSortingRepository
+    . You need CRUD + pagination + sorting, but no JPA-specific batch operations
+    . Example: Listing records with page number and sorting by fields (e.g. student list sorted by name)
+    . Avoid if you need saveAll, flush, or other JPA-specific enhancements.
+
+3. JpaRepository
+    . You need full CRUD, paging, sorting, plus JPA-specific methods
+    . Suitable for most real-world Spring Boot applications
+    . Example: Managing any entity with pagination, sorting, batch inserts/updates, and custom queries
+    . Best practice: Always extend JpaRepository unless you have a very minimal CRUD-only use case, because it includes all features of other repositories.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Derived Query Methods
+- Spring Data JPA lets you define queries just by naming methods properly in your repository interface — no SQL, JPQL, or annotations required.
+- Spring reads your method name → interprets it → auto-generates the SQL/JPQL behind the scenes.
+- Syntax Rule - findBy<PropertyName><Operation>
+- We can also add logical operators, sorting, nested properties, and more.
+- Example ->
+    @Entity
+    public class Student {
+        @Id
+        private Long id;
+        private String name;
+        private String email;
+        private int age;
+        private boolean active;
+    }
+
+    - Here basic queries will be
+    | Method Name                 | Auto Query                                   |
+    | --------------------------- | -------------------------------------------- |
+    | `findByName(String name)`   | `SELECT s FROM Student s WHERE s.name = ?1`  |
+    | `findByEmail(String email)` | `SELECT s FROM Student s WHERE s.email = ?1` |
+    | `findByAge(int age)`        | `SELECT s FROM Student s WHERE s.age = ?1`   |
+
+    - Advanced queries will be
+    | Method Name                                    | What It Does              |
+    | ---------------------------------------------- | ------------------------- |
+    | `findByNameAndAge(String name, int age)`       | WHERE name=? AND age=?    |
+    | `findByNameOrEmail(String name, String email)` | WHERE name=? OR email=?   |
+    | `findByAgeBetween(int start, int end)`         | WHERE age BETWEEN ? AND ? |
+    | `findByAgeLessThan(int age)`                   | WHERE age < ?             |
+    | `findByNameLike(String name)`                  | WHERE name LIKE ?         |
+    | `findByEmailContaining(String keyword)`        | WHERE email LIKE %?%      |
+    | `findByActiveTrue()`                           | WHERE active = true       |
+    | `findByAgeIn(List<Integer> ages)`              | WHERE age IN (?, ?, ...)  |
+
+Note - Use @Query annotation for complex queries or joins.
+
+- Spring Data JPA provides a set of reserved keywords that are used in method name query derivation. These tell Spring how to generate the query
+  automatically.
+- Common action prefixes
+    | Keyword    | Description                                                           |
+    | ---------- | --------------------------------------------------------------------- |
+    | `findBy`   | Most common. Retrieves entities (by default returns List or Optional) |
+    | `readBy`   | Synonym for `findBy`                                                  |
+    | `getBy`    | Synonym for `findBy`, more expressive                                 |
+    | `queryBy`  | Another alias for `findBy`                                            |
+    | `searchBy` | Alias (not always recommended, not well documented)                   |
+    | `countBy`  | Returns `long`, counts rows matching condition                        |
+    | `existsBy` | Returns `boolean`, checks existence of rows                           |
+    | `deleteBy` | Deletes records based on criteria (returns count of deleted rows)     |
+    | `removeBy` | Same as `deleteBy` (synonym)                                          |
+
+- Condition and operators (Suffix keywords)
+    | Keyword                                                 | Description                 |
+    | ------------------------------------------------------- | --------------------------- |
+    | `And`, `Or`                                             | Logical operators           |
+    | `Between`, `LessThan`, `GreaterThan`, `After`, `Before` | Range or comparison         |
+    | `IsNull`, `IsNotNull`                                   | Null checks                 |
+    | `Like`, `NotLike`                                       | Pattern matching (with `%`) |
+    | `Containing`, `StartingWith`, `EndingWith`              | Smart LIKE queries          |
+    | `In`, `NotIn`                                           | Collection-based matching   |
+    | `True`, `False`                                         | For booleans                |
+    | `IgnoreCase`                                            | Case-insensitive matching   |
+
+- Combining Prefixes and Suffixes Examples
+    findByEmailAndActiveTrue()
+    countByAgeGreaterThan(int age)
+    deleteByCreatedDateBefore(LocalDate date)
+    existsByUsernameIgnoreCase(String username)
+    findTop3ByOrderByAgeDesc()
+
+# Notes - Don’t mix too many conditions in one method – consider using @Query or Specification
+          Use Optional<T> for single-record queries to avoid null handling
+
+- Top / First Queries in Spring Data JPA
+    Spring Data JPA allows you to limit the number of results returned from a derived query using the keywords:
+    . Top → Get top N results
+    . First → Get the first result, optionally sorted
+
+- Distinct
+    . These help refine your result set — either by removing duplicates (DISTINCT) or limiting how many records come back (LIMIT).
+    1. Distinct : It ensures the query returns only unique results — just like the SQL DISTINCT keyword.
+                  Spring Data JPA allows you to prefix your method with distinct
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Custom queries using @Query annotation
+- Derived queries are great, but sometimes you need:
+    . More complex logic
+    . Joins, grouping, projections
+    . Sorting, filtering beyond method name capabilities
+    . That’s when JPQL (Java Persistence Query Language) with @Query comes in handy.
+
+JPQL - It’s an object-oriented query language
+       Works with entities, not tables
+       Uses Java class names and field names, not SQL table/column names
+Syntax - @Query("SELECT e FROM EntityName e WHERE e.field = ?1")
+         ReturnType methodName(ParameterType param);
+         Here - We can Use ?1, ?2 for positional parameters
+                       Or :paramName for named parameters
+                       [Most of the time we used the named parameters]
+
+Native sql -> It is same as JPQL it is just we use table names in native sql and in JPQL we use the entity directly
+              We need to add nativeQuery = true parameter in the Query
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@Modifying annotation
+- Spring Data JPA repositories are read-only by default.
+- So when we want to perform write operations (like UPDATE, DELETE, or INSERT) using a custom @Query, we must annotate it with @Modifying.
+- Without it we can get an error
+- Using @Modifying does bypass the persistence context — and that’s a key behavior to understand.
+- In JPA, the persistence context (aka the 1st-level cache) is where managed entities are tracked by the EntityManager.
+  Any changes you make to these entities while they’re managed will automatically be synchronized with the DB at transaction commit.
+  But when you use a JPQL or native SQL update/delete with @Modifying, you're:
+  Directly hitting the database,
+  NOT updating any entities currently in memory
+- You may have stale data in memory if :
+    . You fetched some entities earlier
+    . Then did an update using @Modifying
+    . And kept using the same old (unchanged) entities afterward
+- To avoid stale memory issue we can use
+    | Approach                                        | Explanation                                                                                  |
+    | ----------------------------------------------- | -------------------------------------------------------------------------------------------- |
+    | `clearAutomatically = true`                     | Automatically clears the persistence context after executing the query                       |
+    | Manually call `entityManager.clear()`           | Do it yourself after `@Modifying` query                                                      |
+    | Avoid mixing `@Modifying` with managed entities | If you're working with entity instances, prefer changing them directly and let JPA manage it |
+- Example
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE Student s SET s.active = false WHERE s.age > :age")
+    int deactivateOldStudents(@Param("age") int age);
+    - Here - This ensures that the persistence context is cleared automatically, so any future queries will reload fresh data.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Relationship Mapping in JPA
+- In real-world applications, your data isn't isolated — entities are related.
+- JPA helps you map and manage relationships between entities with just a few annotations.
+- RelationShips
+    | Relationship | Annotation    |
+    | ------------ | ------------- |
+    | One-to-One   | `@OneToOne`   |
+    | One-to-Many  | `@OneToMany`  |
+    | Many-to-One  | `@ManyToOne`  |
+    | Many-to-Many | `@ManyToMany` |
+
+----
+
+1. One-To-One Relationship in JPA
+- A One-to-One relationship is when one entity is associated with exactly one other entity, and vice versa.
+- Examples
+    | Entity A | Entity B    |
+    | -------- | ----------- |
+    | User     | UserProfile |
+    | Employee | IDCard      |
+    | Customer | Address     |
+
+- Basic example of @OneToOne with Foreign Key [Unidirectional]
+    Lets say we have each User has one Profile.
+    @Entity
+    public class User {
+        @Id
+        private Long id;
+        private String username;
+
+        @OneToOne(cascade = CascadeType.ALL)
+        @JoinColumn(name = "profile_id") // FK column
+        private Profile profile;
+    }
+
+    @Entity
+    public class Profile {
+        @Id
+        private Long id;
+        private String bio;
+    }
+    Here - we can use profile via user only
+
+- Example of @OneToOne Bidirectional mapping
+    If we want Profile to access the User as well:
+
+    @Entity
+    public class Profile {
+        @Id
+        private Long id;
+
+        private String bio;
+
+        @OneToOne(mappedBy = "profile") // inverse side
+        private User user;
+    }
+    Now User owns the relationship.
+    Profile is inverse, and mappedBy = "profile" refers to the field in User.
+
+- In a bidirectional mapping:
+    | Side         | Annotation    | Notes                          |
+    | ------------ | ------------- | ------------------------------ |
+    | Owning Side  | `@JoinColumn` | Controls the FK                |
+    | Inverse Side | `mappedBy`    | Refers to field in owning side |
+
+- By default @OneToOne is EAGER So profile will always be loaded with user
+
+----
+
+2. One-To-Many Relationship in JPA
+- A OneToMany relationship means one entity is related to many instances of another entity.
+- Examples
+    | One (Parent) | Many (Children) |
+    | ------------ | --------------- |
+    | Department   | Students        |
+    | BlogPost     | Comments        |
+    | Customer     | Orders          |
+
+- Bi-Directional OneToMany mapping
+    Lets say we have One Department has many Students
+
+    Student Entity (Owning side):
+    @Entity
+    public class Student {
+        @Id
+        private Long id;
+        private String name;
+
+        @ManyToOne
+        @JoinColumn(name = "department_id")  // FK in Student table
+        private Department department;
+    }
+
+    Department Entity (Inverse side):
+    @Entity
+    public class Department {
+        @Id
+        private Long id;
+        private String name;
+
+        @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
+        private List<Student> students = new ArrayList<>();
+    }
+
+    Here - Student holds the foreign key — it's the owning side
+           Department.students is the inverse side, using mappedBy = "department"
+           cascade = CascadeType.ALL means students will be saved/removed with department
+
+- Default Fetch Type is LAZY
+- In oneToMany mapping owning side will always be parent side
+- Defines parent to child relation ship
+- Avoid CascadeType.ALL unless you’re fully confident.
+
+----
+
+3. Many-To-One
+- A Many-to-One relationship means many entities (children) are related to one parent entity.
+- It’s the reverse of @OneToMany.
+- Example
+    | Many (Child Entity) | One (Parent Entity) |
+    | ------------------- | ------------------- |
+    | Students            | Department          |
+    | Orders              | Customer            |
+    | Comments            | BlogPost            |
+
+    Let’s say each Student belongs to one Department.
+    @Entity
+    public class Student {
+        @Id
+        private Long id;
+
+        private String name;
+
+        @ManyToOne
+        @JoinColumn(name = "department_id") // FK column in Student table
+        private Department department;
+    }
+
+    Here - @ManyToOne marks the child side (owning side)
+           @JoinColumn creates the foreign key in the child table (department_id in Student)
+           No need for mappedBy (only needed on the inverse side)
+
+    @Entity
+    public class Department {
+        @Id
+        private Long id;
+
+        private String name;
+
+        @OneToMany(mappedBy = "department")
+        private List<Student> students = new ArrayList<>();
+    }
+
+    Here - mappedBy = "department" points to the field in Student entity
+           This is the inverse side
+
+- Fetch type by default is EAGER
+- Cascade option is generally not used unless we are creating parent with the child class
+- In ManyToOne mapping owning side will always be children side
+- Defines child-to-parent mapping
+- Child is owning side cause foreign key exists in child table
+
+----
+
+4. Many-To-Many Relationship in JPA
+- A Many-to-Many relationship means many entities on both sides are related to many entities on the other side.
+- Example -
+        | Entity A | Entity B |
+        | -------- | -------- |
+        | Student  | Course   |
+        | Author   | Book     |
+        | User     | Role     |
+
+        For example: A student can enroll in many courses, and each course can have many students.
+- Example - @Entity
+            public class Student {
+                @Id
+                private Long id;
+                private String name;
+
+                @ManyToMany
+                @JoinTable(
+                    name = "student_course",
+                    joinColumns = @JoinColumn(name = "student_id"),
+                    inverseJoinColumns = @JoinColumn(name = "course_id")
+                )
+                private List<Course> courses = new ArrayList<>();
+            }
+
+            @Entity
+            public class Course {
+                @Id
+                private Long id;
+                private String title;
+
+                @ManyToMany(mappedBy = "courses")
+                private List<Student> students = new ArrayList<>();
+            }
+
+            Here - A join table called student_course is created with:
+                   student_id FK to Student
+                   course_id FK to Course
+                   Student is the owning side.
+                   Course uses mappedBy = "courses" to reference the field in Student.
+
+- LAZY is default fetch type
+- JoinTable is created automatically unless we want to a separate mapping table
+- We can use custom join entity as well
+- use PERSIST, MERGE and avoid REMOVE unless sure for cascading
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Fetch Types -
+- In JPA, FetchType defines when related entities (associations) are loaded from the database.
+- There is two types of fetching
+  | Fetch Type | Description                                                          |
+  | ---------- | -------------------------------------------------------------------- |
+  | `EAGER`    | Loads the related entity immediately along with the main entity.     |
+  | `LAZY`     | Loads the related entity only when it's accessed (on-demand).        |
+
+    1. FetchType.LAZY
+    - Default for:
+        @OneToMany
+        @ManyToMany
+    - Lazy means the association is loaded only when you use it.
+    - Example -
+                Student s = studentRepo.findById(1L);  // department is NOT fetched
+                Department dept = s.getDepartment();   // department is fetched NOW (when accessed)
+    - Behind the scenes: Hibernate uses proxy objects.
+    - LazyInitializationException can Occurs if you try to access lazy-loaded fields after session is closed.
+
+    2. FetchType.EAGER
+    - Default for:
+        @ManyToOne
+        @OneToOne
+    - Eager means the association is loaded immediately, along with the main entity.
+    - Example -
+                Student s = studentRepo.findById(1L);  // department is fetched IMMEDIATELY
+                Here -  Downsides:
+                       Causes unnecessary joins
+                       Can lead to performance bottlenecks (especially with lists)
+                       Can trigger N+1 query problems
+
+    # Comparison for EAGER and LAZY
+    | Feature          | EAGER                         | LAZY                           |
+    | ---------------- | ----------------------------- | ------------------------------ |
+    | Load Timing      | Immediate with main entity    | On-demand (when accessed)      |
+    | Performance      | Can be costly (too much data) | Better control over loading    |
+    | Default for      | `@ManyToOne`, `@OneToOne`     | `@OneToMany`, `@ManyToMany`    |
+    | N+1 Problem Risk | High if not managed carefully | Also risky if accessed in loop |
+    | Best Practice    | Use only when necessary       | Preferable in most cases       |
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Note - once the method annotated with @Transactional finishes, the session is closed.
+       - If we don't use @Transactional
+            In Spring Boot (with Spring Data JPA):
+            You might not use @Transactional explicitly.
+            But Spring Data automatically manages transactions for repository methods.
+            This means: Spring opens a session, starts a transaction, and closes it when your repository method ends.
+       - Session Open/Close
+         | Operation                         | Session starts        | Session ends              |
+         | --------------------------------- | --------------------- | ------------------------- |
+         | Repository call (e.g. `findById`) | Start of method       | End of method execution   |
+         | Manual `@Transactional`           | Start of method       | End of method execution   |
+         | `open-in-view: true`              | Start of HTTP request | End of response rendering |
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+N+1 Problem
+- Let’s say:
+    You want to fetch a list of Students.
+    Each student has a Department (@ManyToOne(fetch = LAZY)).
+    List<Student> students = studentRepository.findAll();
+    for (Student s : students) {
+        System.out.println(s.getDepartment().getName());
+    }
+    Here - 1 query to get all students
+           N queries (1 per student) to fetch each department lazily
+           So for 100 students → 101 SQL queries = N + 1 Problem
+
+- Solution: JOIN FETCH
+- A JOIN FETCH tells JPA : Fetch the related entity eagerly using a JOIN in a single query.
+- Example - @Query("SELECT s FROM Student s JOIN FETCH s.department")
+            List<Student> findAllWithDepartment();
+            Here - 1 query only which will performs an INNER JOIN to fetch students and their departments
+            SQL Behind the scene - SELECT s.*, d.* FROM students s JOIN departments d ON s.department_id = d.id;
+- When we should use JOIN FETCH
+    accessing related fields
+    seeing LazyInitializationException
+    want performance optimization
+    want total control of joins
+
+# Note - Works only in JPQL (@Query), not in method name derivation.
+       - Avoid multiple JOIN FETCH on collections (causes Cartesian product explosion)
+         Example - SELECT s FROM Student s
+                   JOIN FETCH s.department
+                   JOIN FETCH s.courses
+
+----
+
+Solving N + 1 problem using entity graph
+- @EntityGraph is a JPA annotation that lets you specify which related entities to fetch eagerly, without writing JPQL or using JOIN FETCH.
+- It’s a declarative way to optimize fetching strategy and avoid the N+1 problem.
+- Example
+    @Entity
+    public class Student {
+        @Id Long id;
+        String name;
+
+        @ManyToOne(fetch = FetchType.LAZY)
+        Department department;
+    }
+
+    - Here default behaviour
+    List<Student> students = repo.findAll();
+    // accessing getDepartment() later causes N+1
+
+    - Using @EntityGraph
+    public interface StudentRepository extends JpaRepository<Student, Long> {
+
+        @EntityGraph(attributePaths = "department")
+        List<Student> findAll();
+    }
+    This tells Spring : When fetching Student, also fetch department in the same SQL query.
+    - SQL Behind the Scenes : SELECT s.*, d.*
+                              FROM students s
+                              LEFT JOIN departments d ON s.department_id = d.id
+- we can even go nested : @EntityGraph(attributePaths = { "department.faculty" })
+- we can target more attributes as well - @EntityGraph(attributePaths = { "department", "courses", "advisor" })
+
+----
+
+Join Fetch vs EntityGraph
+- both of which are used to solve the N+1 problem by eagerly loading related entities — but they differ a lot in how and where they are used.
+
+| Feature                  | `JOIN FETCH`                     | `@EntityGraph`        |
+| ------------------------ | -------------------------------- | --------------------- |
+| Works in JPQL            |   Yes                            |   No                  |
+| Works in derived queries |   No                             |   Yes                 |
+| Pagination support       |   Problematic (with collections) |   Safe                |
+| Clean separation         |   Mixed with query logic         |   Declarative + clean |
+| Complex join support     |   Yes                            |   Limited             |
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cascading in JPA
+- Cascading is a mechanism that lets one entity operation (like save/delete) automatically propagate to related entities.
+- It applies mainly to entity relationships like @OneToOne, @OneToMany, etc.
+- Without cascading we have to manually persist or remove child entities :
+- Example - Student student = new Student();
+            Address address = new Address();
+            student.setAddress(address);
+
+            // You must save both
+            entityManager.persist(address);
+            entityManager.persist(student);
+- With cascading we just persist the parent — JPA handles the rest :
+- Example - @Entity
+            public class Student {
+                @OneToOne(cascade = CascadeType.PERSIST)
+                private Address address;
+            }
+
+            Student student = new Student();
+            student.setAddress(new Address());
+
+            // Only persist student
+            entityManager.persist(student); // Address gets saved too!
+
+- Cascade Types
+
+| CascadeType | Description                                                   |
+| ----------- | ------------------------------------------------------------- |
+| `PERSIST`   | When parent is persisted, child is persisted                  |
+| `MERGE`     | When parent is merged (updated), child is merged              |
+| `REMOVE`    | When parent is removed, child is removed                      |
+| `DETACH`    | When parent is detached from persistence context, so is child |
+| `REFRESH`   | Refreshes child when parent is refreshed                      |
+| `ALL`       | Includes all of the above                                     |
+
+- @OneToMany with multiple CascadeTypes :
+    @OneToMany(mappedBy = "student", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<CourseRegistration> registrations;
+    Here - When a student is saved → registrations are saved.
+           When a student is updated → registrations are updated.
+           But deletion of student won’t delete the registrations.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Transaction Management in Spring
+A transaction is a set of operations that are executed as a single unit. Either all succeed, or none take effect (atomicity).
+Example - when transferring money:
+          Deduct from Account A
+          Add to Account B
+          If step 2 fails, step 1 must roll back.
+
+- @Transactional Annotation : In Spring, @Transactional manages the transaction boundaries automatically.
+- Where we should use it : Service Layer is the most common and recommended.
+                           Can be applied at the method or class level.
+- Example : Service-Level Transaction
+            @Service
+            public class UserService {
+
+                @Transactional
+                public void registerUser(User user) {
+                    userRepository.save(user);
+                    emailService.sendWelcomeEmail(user.getEmail()); // if this fails, DB insert rolls back
+                }
+            }
+             Here - If any exception occurs, the entire transaction rolls back — user won’t be saved.
+- Repositories already participate in the transaction created by the service so we usually don’t need @Transactional here unless doing something custom.
+- By default, Spring rolls back only on unchecked exceptions (RuntimeException, Error). To roll back on checked exceptions, we can use
+  @Transactional(rollbackFor = Exception.class)
+  public void saveWithFileUpload(User user) throws IOException {
+      userRepository.save(user);
+      fileService.uploadFile(user.getProfileImage()); // throws checked exception
+  }
+- We can use @Transactional(readOnly = true) to optimize read only operations
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Projections
+- By default, JpaRepository returns entire entities, even if you just need 2–3 fields.
+  That causes:
+    . Unnecessary joins
+    . More memory usage
+    . Possible LazyInitializationExceptions
+    . Projections solve this by allowing you to fetch only required columns directly from the DB.
+- There are two types of projections
+    1. Interface based projections : We define an interface with getters matching the entity fields (or aliases in JPQL).
+    public interface UserSummary {
+        String getUsername();
+        String getEmail();
+    }
+
+    public interface UserRepository extends JpaRepository <User, Long> {
+        List<UserSummary> findByActiveTrue();
+    }
+
+    - Spring will auto-generate proxy-based projections and map fields directly from query results.
+    - Auto-mapped by Spring
+    - Works with native, JPQL, derived queries
+    - Faster than DTO mapping (no constructor call)
+
+    2. Class-Based Projection (DTO Projection) : We define a DTO with a matching constructor.
+    public class UserDTO {
+        private final String username;
+        private final String email;
+
+        public UserDTO(String username, String email) {
+            this.username = username;
+            this.email = email;
+        }
+
+        // Getters...
+    }
+    - We must use a custom query (@Query) for class-based projections.
+    - Constructor param order and types must match exactly with the JPQL SELECT new clause.
+
+    @Query("SELECT new com.example.dto.UserDTO(u.username, u.email) FROM User u WHERE u.active = true")
+    List<UserDTO> findActiveUsers();
+
+    - We can use DTO projections is the following cases
+        . You want immutable data                   
+        . You need to add logic, format, transform  
+        . You want to avoid proxies                     
+        . You want to use projection outside of JPA
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Paging and Sorting
+- Efficiently load data page by page, sort results, and even combine with custom queries.
+- Reduce memory usage (fetch 10 records instead of 10,000)
+- Useful for frontend pagination (tables, infinite scroll)
+- Helps scale your app
+    1. Pageable and PageRequest
+    - Spring provides a Pageable interface and PageRequest implementation to support pagination.
+    - public interface ProductRepository extends JpaRepository<Product, Long> {
+          Page<Product> findByCategory(String category, Pageable pageable);
+      }
+
+      // In service
+      Pageable pageable = PageRequest.of(0, 5); // page 0 (first), 5 items per page
+      Page<Product> page = productRepository.findByCategory("electronics", pageable);
+      Here -  Page Object Returns:
+             .getContent() → List of results
+             .getTotalPages()
+             .getTotalElements()
+             .isFirst(), .isLast()
+
+    2. Sorting with Sort object
+    - We can also sort using the Sort class.
+    - Example :
+        Sort sort = Sort.by("price").descending();
+        Pageable pageable = PageRequest.of(0, 10, sort);
+
+    3. Pagination with Custom Queries
+    - If your query is custom, you must return a Page<T> and provide a countQuery for total rows.
+    - JPQL Example :
+        @Query(
+          value = "SELECT p FROM Product p WHERE p.category = :category",
+          countQuery = "SELECT COUNT(p) FROM Product p WHERE p.category = :category"
+        )
+        Page<Product> findByCategoryCustom(@Param("category") String category, Pageable pageable);
+
+    - Native SQL Example :
+        @Query(
+          value = "SELECT * FROM products WHERE category = :category",
+          countQuery = "SELECT COUNT(*) FROM products WHERE category = :category",
+          nativeQuery = true
+        )
+        Page<Product> findByCategoryNative(@Param("category") String category, Pageable pageable);
+
+- | Feature        | Description                            |
+  | -------------- | -------------------------------------- |
+  | `Pageable`     | Interface to describe paging & sorting |
+  | `PageRequest`  | Implementation of `Pageable`           |
+  | `Sort`         | Chainable object to define sort order  |
+  | `Page<T>`      | Paginated result with metadata         |
+  | Custom queries | Require `countQuery` for total pages   |
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Best Practices in Spring Data JPA
+1. Avoiding the N+1 Select Problem
+    - Occurs when JPA loads a parent entity, and then lazily loads each of its children in separate queries (1 query + N additional queries).
+    - List<Department> departments = departmentRepository.findAll();
+      for (Department dept : departments) {
+          System.out.println(dept.getEmployees().size()); // triggers N queries
+      }
+    - Solutions :
+        . Use JOIN FETCH in JPQL
+        . Use @EntityGraph
+
+2. Use DTO Projections for Performance
+    - Don’t fetch entire entities when only specific fields are needed.
+    - Solutions :
+        . Interface-based projection
+        . Class-based DTO projection
+    - Improves performance
+    - Reduces serialization issues in REST APIs
+    - Especially useful when exposing public APIs
+
+3. Define Proper Transactional Boundaries
+    - Keep read-only transactions clean using @Transactional(readOnly = true)
+    - Only annotate service layer, not the repository.
+    - Avoid long/open transactions. No heavy logic inside transactions.
+
+4. Use Fetch Joins Effectively
+    - When you know you’ll need child entities, use JOIN FETCH or @EntityGraph.
+    - Fetch everything in 1 query
+    - Avoid doing this on huge collections (can cause memory spike)
+
+5. Use pagination with large datasets : Avoid loading huge result sets into memory
+6. Prefer DTOs in REST APIs : Avoid exposing JPA entities directly
+7. Avoid bi-directional relationships unless needed : They complicate serialization (especially in REST)
+8. Use @Transactional carefully : Nested or misused transactions can lead to bugs
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
