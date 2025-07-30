@@ -1,0 +1,368 @@
+
+                                                                 || जय शंकर ||
+
+Micro-Services
+
+- Microservices is an architectural style where an application is structured as a collection of small, autonomous services. Each service is :
+    . Independent (can be developed, deployed, and scaled separately)
+    . Focused on a single business capability
+    . Communicates with other services using lightweight protocols like HTTP/REST, gRPC, or message queues
+
+- Traditional applications used to be monolithic, where :
+    . All features (login, order, payment, etc.) are part of a single codebase
+    . One failure could bring down the whole app
+    . Scaling is hard (you have to scale the entire app)
+
+- Microservices solve these problems :
+    | Feature          | Monolithic             | Microservices                                             |
+    | -----------------| ---------------------- | --------------------------------------------------------- |
+    | Codebase         | One large app          | Many smaller apps                                         |
+    | Deployment       | One unit               | Independently deployable                                  |
+    | Scalability      | Scale whole app        | Scale individual services                                 |
+    | Development      | Slower, tight coupling | Faster, autonomous teams                                  |
+    | Technology stack | Usually one            | Each service can use different tech (Java, Node.js, etc.) |
+
+- Example : E-Commerce System
+    - Instead of one huge application, you split it into services :
+        . User Service – handles user accounts
+        . Product Service – manages product catalog
+        . Cart Service – stores shopping cart info
+        . Payment Service – handles payments
+        . Notification Service – sends emails/SMS
+    - Each service :
+        . Has its own database
+        . Communicates with others via REST or messaging
+        . Can be deployed independently
+
+- Key Characteristics of Microservices
+    | Characteristic                | Description                                               |
+    | ------------------------------| --------------------------------------------------------- |
+    | Independent Deployability     | Services can be updated/deployed without affecting others |
+    | Decentralized Data Management | Each service manages its own DB                           |
+    | Resilience                    | Failures in one service shouldn’t crash the whole system  |
+    | Scalability                   | You can scale services based on their load                |
+    | Technology Diversity          | Each team can pick suitable tools/tech                    |
+    | DevOps Alignment              | Encourages CI/CD and automation                           |
+    | Business-Oriented             | Services align with business capabilities                 |
+
+- Communication Between Microservices
+    1. REST API (Synchronous)
+       Example: ProductService calls InventoryService using HTTP
+
+    2. Message Brokers (Asynchronous)
+       Tools like RabbitMQ, Kafka — useful for events (e.g., "Order Placed")
+
+- Challenges with Microservices
+    | Challenge                          | Description                                    |
+    | -----------------------------------| ---------------------------------------------- |
+    | Distributed System Complexity      | Debugging and tracing across services is hard  |
+    | Data Consistency                   | No single DB, need eventual consistency        |
+    | Latency                            | Inter-service communication adds delay         |
+    | Deployment Overhead                | More pipelines, more configurations            |
+    | Service Discovery & Load Balancing | Needs tools like Eureka, Ribbon, or Kubernetes |
+
+- Tools/Technologies Often Used
+    . Spring Boot – build each service
+    . Spring Cloud – tools for microservices (Eureka, Config Server, etc.)
+    . Docker – package each service
+    . Kubernetes – deploy/manage services
+    . Netflix OSS – Eureka (discovery), Zuul (gateway), Hystrix (circuit breaker)
+    . API Gateway – single entry point for all services
+    . Message Brokers – RabbitMQ, Apache Kafka
+
+---
+
+# Monolith vs Microservices
+- These are two different architectural styles used to design and build applications.
+
+Monolithic Architecture : A monolith is a single, unified application where all features are part of one codebase and deployed as one unit.
+- Example:
+    . An e-commerce monolith app includes:
+    . User Management
+    . Product Catalog
+    . Shopping Cart
+    . Payment
+    . Notifications
+    Here - All bundled into one application, deployed as a single WAR or JAR.
+- Advantages :
+    . Easy to develop and deploy (at small scale)
+    . Easier to test (single app)
+    . Simple to debug (centralized logging)
+- Disadvantages :
+    . Difficult to scale specific parts (must scale entire app)
+    . Any small change requires full redeployment
+    . Hard to understand and manage large codebases
+    . Not suitable for large teams (merge conflicts, tight coupling)
+
+Microservices Architecture : Microservices break the monolith into small, loosely coupled services, where each handles a specific business capability.
+- Example :
+    That same e-commerce app becomes :
+    . User Service
+    . Product Service
+    . Cart Service
+    . Payment Service
+    . Notification Service
+    Here - Has its own database
+           Runs in its own process
+           Communicates via HTTP (REST) or messaging (Kafka, RabbitMQ)
+           Can be deployed independently
+-  Advantages:
+    . Scalability: Scale services independently (only scale ProductService if needed)
+    . Flexibility: Use different tech per service (Java, Node.js, Python, etc.)
+    . Faster Development: Smaller codebases, faster iterations
+    . Resilience: Failure in one service doesn't crash the whole app
+    . Team Independence: Teams can own and deploy their service
+- Disadvantages:
+    . More complex infrastructure (discovery, API Gateway, configs)
+    . Distributed system: harder to debug and test
+    . Data consistency is tricky (no single DB)
+    . Requires DevOps maturity (CI/CD, monitoring, logging)
+
+When to Use What ?
+    | Use Monolith When              | Use Microservices When            |
+    | ------------------------------ | --------------------------------- |
+    | Project is small or MVP        | Large-scale system                |
+    | Team is small                  | Multiple teams across domains     |
+    | You want fast, simple delivery | You need scalability, flexibility |
+    | Deployment is simple           | CI/CD and DevOps is in place      |
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Microservice Architecture
+- These patterns help microservices communicate, scale, and stay resilient in production.
+
+1. API Gateway
+- An API Gateway is a single entry point for all client requests to the backend microservices.
+- Instead of clients calling services directly, they call the gateway.
+- Responsibilities:
+    . Route requests to appropriate services
+    . Handle authentication & authorization
+    . Perform rate limiting
+    . Enable load balancing
+    . Return aggregated responses
+- Common Tools:
+    . Spring Cloud Gateway (Java)
+- Client → API Gateway → Product Service
+                        → Order Service
+                        → Auth Service
+- Benefits:
+    . Simplifies client logic
+    . Centralizes cross-cutting concerns (security, logging, etc.)
+    . Easier versioning and monitoring
+
+2. Service Registry & Discovery
+- A Service Registry keeps a dynamic list of available services and their locations (IP + port).
+- Services can register themselves on startup and discover others at runtime.
+- Tools:
+    . Eureka (Netflix OSS)
+    . Consul
+    . Zookeeper
+    . Kubernetes Service Discovery (built-in)
+- Components:
+    . Service Registry – central DB of services (like a phonebook)
+    . Service Instance – microservices register themselves here
+    . Service Discovery Client – finds other services via registry
+- Types:
+    . Client-side discovery (e.g., Netflix Eureka + Ribbon)
+    . Server-side discovery (e.g., Kubernetes Services + Ingress)
+- Benefits:
+    . No need to hardcode service URLs
+    . Supports dynamic scaling
+    . Enables fault-tolerant service lookups
+
+3. Config Server (Centralized Configuration Management)
+- A Config Server is a centralized place to manage externalized configurations for all microservices.
+- Instead of storing configs inside each app, they pull it from this server at runtime or startup.
+- Tools :
+    . Spring Cloud Config Server
+      Reads configs from Git, Vault, filesystem
+- Benefits:
+    . Single source of truth for configs
+    . Dynamic refresh of properties (with Spring Cloud Bus)
+    . Avoids config duplication
+    . Supports environment-specific properties (dev, QA, prod)
+
+4. Circuit Breaker
+- A Circuit Breaker protects your system from cascading failures.
+- If one service becomes slow or fails, the circuit breaker trips and blocks further requests temporarily.
+- Tools :
+    . Resilience4j (Spring Boot’s preferred)
+- Key Concepts:
+    . Closed: Normal requests flow
+    . Open: Requests are blocked, fallback is returned
+    . Half-Open: System tests if the service has recovered
+- Example - @CircuitBreaker(name = "paymentService", fallbackMethod = "fallback")
+            public String callPaymentService() {
+                // REST call to PaymentService
+            }
+- Benefits:
+    . Prevents resource exhaustion
+    . Improves system stability and user experience
+    . Can return cached/default responses during failure
+
+5. Load Balancer
+- Distributes traffic across multiple instances of a microservice to ensure high availability and performance.
+- Types:
+  Client-Side Load Balancing:
+    Logic is inside the service calling others
+    Tools: Ribbon, Feign
+
+  Server-Side Load Balancing:
+    An external system balances load
+    Tools: NGINX, HAProxy, Kubernetes Ingress
+
+-  Goal:
+    . Evenly distribute requests
+    . Avoid overloading any one service instance
+    . Enable scalability and fault tolerance
+- Benefits:
+    . Improves system throughput
+    . Automatically reroutes if one instance fails
+    . Enables horizontal scaling
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Communication Between Services
+- In Microservices, services often need to talk to each other. This is called inter-service communication.
+- There are 3 popular synchronous HTTP-based ways in Spring Boot:
+    . RestTemplate (legacy, but still used)
+    . Feign Client (recommended)
+    . WebClient (modern, reactive)
+
+1. RestTemplate (Basic Way)
+- A simple blocking (synchronous) HTTP client used to send HTTP requests from one service to another.
+- Example :
+    @RestController
+    public class OrderController {
+
+        @Autowired
+        private RestTemplate restTemplate;
+
+        @GetMapping("/order")
+        public String placeOrder() {
+            String productInfo = restTemplate.getForObject("http://PRODUCT-SERVICE/product", String.class);
+            return "Order placed with: " + productInfo;
+        }
+    }
+
+- Characteristics:
+    . Easy to use
+    . Fully synchronous (blocks thread)
+    . Good for quick HTTP calls
+    . Doesn’t support service discovery directly (you must know the exact URL or use Ribbon)
+- Limitations:
+    . Deprecated in favor of WebClient
+    . No built-in retry, circuit breaker, or load balancing (unless combined with Ribbon/Resilience4j)
+
+---
+
+2. Feign Client (Declarative, Recommended)
+- A declarative HTTP client that lets you call other services by just writing interfaces — no manual HTTP code!
+- Feign is a declarative HTTP client developed by Netflix and supported by Spring Cloud.
+- It lets you call other microservices using simple Java interfaces — no boilerplate REST code!
+- It's tightly integrated with Spring Cloud, supports:
+    . Service Discovery
+    . Load Balancing
+    . Circuit Breaker (Resilience4j)
+- Benefits:
+    . Clean, readable code (interface-based)
+    . Integrates with Eureka (service discovery)
+    . Works well with Resilience4j/Hystrix
+    . Supports fallback methods
+
+- Limitations:
+    . Synchronous (not reactive)
+    . Not ideal for streaming or large payloads
+
+- Example :
+    @FeignClient(name = "product-service")
+    public interface ProductClient {
+        @GetMapping("/product")
+        String getProduct();
+    }
+
+- How Feign Works Under the Hood
+    . Feign uses dynamic proxies to implement interfaces at runtime.
+    . When you inject a Feign client and call a method, it makes a REST HTTP call under the hood.
+    . If you use Eureka, Feign automatically resolves the service name to IP/port using service discovery.
+
+- Step-by-Step Setup
+1. Add Maven Dependencies
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+
+2. Enable Feign in Main Class
+    @SpringBootApplication
+    @EnableFeignClients
+    public class OrderServiceApplication {
+        public static void main(String[] args) {
+            SpringApplication.run(OrderServiceApplication.class, args);
+        }
+    }
+
+3. Create a Feign Client Interface
+    @FeignClient(name = "product-service")  // 'name' should match the Eureka service ID
+    public interface ProductClient {
+
+        @GetMapping("/product/{id}")
+        Product getProductById(@PathVariable("id") Long id);
+    }
+    This interface is enough — Feign will generate the implementation for you!
+
+4. Use the Feign Client
+    @RestController
+    public class OrderController {
+
+        @Autowired
+        private ProductClient productClient;
+
+        @GetMapping("/order/{productId}")
+        public String placeOrder(@PathVariable Long productId) {
+            Product product = productClient.getProductById(productId);
+            return "Order placed for product: " + product.getName();
+        }
+    }
+
+- If you're not using Eureka (or any Service Discovery), then Feign needs to know the exact URL of the target service.
+  In that case, you manually configure the base URL in your application.yml or application.properties.
+- Example :
+    @FeignClient(name = "productClient", url = "${product.service.url}")
+    public interface ProductClient {
+
+        @GetMapping("/product/{id}")
+        Product getProductById(@PathVariable("id") Long id);
+    }
+
+    // In application.properties
+    product.service.url = http://localhost:8081
+
+    // Request will be send to
+    http://localhost:8081/product/{id}
+
+---
+
+3. WebClient (Reactive Way – Modern)
+- A non-blocking, asynchronous, reactive HTTP client introduced in Spring WebFlux.
+- Example
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    @GetMapping("/order")
+    public Mono<String> placeOrder() {
+        return webClientBuilder.build()
+            .get()
+            .uri("http://product-service/product")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+
+- Benefits:
+    . Non-blocking, highly performant
+    . Ideal for high-concurrency scenarios
+    . Works with Reactor, Mono, Flux
+    . Supports streaming, parallel calls, etc.
+- Limitations:
+    . Harder to debug than synchronous methods
+
