@@ -1,0 +1,18 @@
+
+Currently, I’m working on the ERM Portal Application at Data Economy. It’s an enterprise-level risk management platform that hosts over 10 integrated applications—called pillars—under a single portal with entitlement-based access control.
+My main contribution has been on the Admin Module, where I worked on several critical features:
+Dashboard Configurator: Enables admins to create and manage dashboards based on user SOEID or roles.
+Dynamic Navigation: Built logic to show or hide menu items based on user entitlements.
+Entitlement Reports: Created functionality to generate Excel reports for audit and compliance teams.
+User Feedback Module: Designed a system to collect, store, and export user feedback data.
+Delegation Feature: Developed a secure method for users to temporarily delegate their access to others.
+Profile and Access Summary: Added a profile section that displays user details and entitlement info for transparency.
+On the technical side, we used:
+Java 11 and Spring Boot for backend services
+Spring JPA and RESTful APIs for data access and communication
+Oracle and MySQL databases
+JUnit and Mockito for unit testing
+Swagger and Postman for API testing and documentation
+Bitbucket, Git, Jenkins, OpenShift, and Harness for version control, CI/CD, and deployment
+Agile methodology for development process
+This project helped me gain strong experience in building scalable, secure, and user-centric enterprise applications.
