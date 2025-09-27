@@ -463,7 +463,81 @@ Spring Boot Best Practices
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+@ExceptionHandler
+- It is a Spring MVC annotation used to handle exceptions in your controllers.
+- You place it on a method, and it tells Spring: If this exception occurs, call this method to handle it instead of letting it propagate.
+- Example : @RestController
+            public class UserController {
 
+                @GetMapping("/user/{id}")
+                public String getUser(@PathVariable int id) {
+                    if (id <= 0) {
+                        throw new IllegalArgumentException("Invalid ID");
+                    }
+                    return "User-" + id;
+                }
+
+                @ExceptionHandler(IllegalArgumentException.class)
+                public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+                    return new ResponseEntity<>("Error: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+            }
+
+@ControllerAdvise
+- It is a specialized annotation in Spring that allows you to apply global exception handling, data binding,
+  and model attributes across all controllers in your Spring Boot application.
+- It’s part of Spring MVC.
+- Think of it as a global interceptor for controllers.
+- Without @ControllerAdvice, you’d have to write @ExceptionHandler in every controller to handle exceptions.
+- That leads to code duplication and makes maintenance harder.
+- With @ControllerAdvice, you can move all exception-handling logic into one centralized class.
+- How it Works
+    . You annotate a class with @ControllerAdvice.
+    . Inside it, you use @ExceptionHandler methods to handle specific exceptions.
+    . When an exception is thrown inside any controller:
+    . Spring looks for a matching @ExceptionHandler method inside a @ControllerAdvice class.
+    . If it finds one, it executes it and returns the response.
+    . If not, it falls back to default Spring error handling.
+- Example Workflow
+    . A user calls your API endpoint.
+    . Controller logic throws an exception (UserNotFoundException).
+    . Spring checks inside @ControllerAdvice class.
+    . Finds @ExceptionHandler(UserNotFoundException.class).
+    . Executes that method → builds a proper response → sends back to client.
+
+- Example : @ControllerAdvice
+            public class GlobalExceptionHandler {
+
+                // Handles specific exception
+                @ExceptionHandler(UserNotFoundException.class)
+                public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+                    return new ResponseEntity<>("User not found: " + ex.getMessage(), HttpStatus.NOT_FOUND);
+                }
+
+                // Handles another exception
+                @ExceptionHandler(InvalidRequestException.class)
+                public ResponseEntity<String> handleInvalidRequest(InvalidRequestException ex) {
+                    return new ResponseEntity<>("Invalid request: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+                }
+
+                // Catch-all exception handler
+                @ExceptionHandler(Exception.class)
+                public ResponseEntity<String> handleGeneralError(Exception ex) {
+                    return new ResponseEntity<>("Something went wrong: " + ex.getMessage(),
+                                                HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+
+@ControllerAdvice vs @RestControllerAdvice
+    - @ControllerAdvice
+        . Works for both MVC (returning views) and REST APIs.
+        . By default, it does not return JSON unless you wrap responses in ResponseEntity or annotate methods with @ResponseBody.
+
+    - @RestControllerAdvice
+        . Is a shorthand: @ControllerAdvice + @ResponseBody
+        . Always returns JSON/XML response (more common in REST APIs).
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
