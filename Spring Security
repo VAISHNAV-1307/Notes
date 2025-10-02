@@ -1,0 +1,10 @@
+
+                                                    || जय शंकर ||
+
+Spring Security is all about application level security
+It is distributed in two levels 1. Authentication , 2. Authorization
+1. Authentication -> Authentication is the logic in the application which will figure out who is the user which is trying to access the application and
+   is he allowed to access the application.
+2. Authorization -> Authorization is providing access to particular things or functions based on authority or roles
+
+
