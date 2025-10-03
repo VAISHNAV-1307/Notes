@@ -7,4 +7,14 @@ It is distributed in two levels 1. Authentication , 2. Authorization
    is he allowed to access the application.
 2. Authorization -> Authorization is providing access to particular things or functions based on authority or roles
 
+In the micro services we secure the api endpoints
+
+How to provide credentials
+- To know how to provide credentials we should know, which type of authentication is getting used by application
+- By default it uses HTTP basic type of authentication
+- In case of HTTP basic we need to send the authentication credentials in the HTTP headers which will be base64 encoded
+- In the postman we can directly have the option to navigate to authorization tab and select the option of Basic Auth and then provide the credentials
+- By default user will always be user and when we did not done any configuration for the password the password will be self generated password by the spring security
+
+How does it work ->
 
