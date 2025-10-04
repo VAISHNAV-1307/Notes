@@ -9,12 +9,92 @@ It is distributed in two levels 1. Authentication , 2. Authorization
 
 In the micro services we secure the api endpoints
 
-How to provide credentials
-- To know how to provide credentials we should know, which type of authentication is getting used by application
-- By default it uses HTTP basic type of authentication
-- In case of HTTP basic we need to send the authentication credentials in the HTTP headers which will be base64 encoded
-- In the postman we can directly have the option to navigate to authorization tab and select the option of Basic Auth and then provide the credentials
-- By default user will always be user and when we did not done any configuration for the password the password will be self generated password by the spring security
 
-How does it work ->
+1. HTTP Basic Authentication ->
+    How to provide credentials
+    - To know how to provide credentials we should know, which type of authentication is getting used by application
+    - By default it uses HTTP basic type of authentication
+    - In case of HTTP basic we need to send the authentication credentials in the HTTP headers which will be base64 encoded
+    - In the postman we can directly have the option to navigate to authorization tab and select the option of Basic Auth and then provide the credentials
+    - By default user will always be user and when we did not done any configuration for the password the password will be self generated password by the
+      spring security
+
+    How does it work ->
+    - When in postman we select the basic authentication header has been created which is usually hidden called Authorization as key
+      and for value it will contain in the format of -> "Basic" "Base64 encoded string of password which we have provided"
+    - Base64 is encoding not an encryption
+
+Difference between Encoding, Encryption and Hsh Functions
+1. Encoding ->
+    . Encoding is only a function that it is always possible to reverse somehow. It is just a mathematical transformation that doesn't need a secret to be
+      known to revert it.
+    . Encoding is only a mathematical function that transforms an input into an output in such a way in which you can always revers an output and find out
+      the input if you know the rule or pattern by which it is transformed
+
+2. Encryption ->
+    . It is transforming an input into output but to go back from output to input we always need secret, so not everyone is able to find out which was the
+      input after encryption function
+    . we can say it is a more particular way of encoding
+    . It is still a transformation function but it implies that you always need a secret to revert back
+
+3. Hash Functions ->
+    . In it we can always go from input to output
+    . But by any means we cannot go from output to input
+    . going from output to input is not possible
+    . Input and output are always related to each other means gets transformed in same way everytime
+    . Hash functions are preferred way to store the passwords
+    . then we can encrypt the input and match it with the stored encrypted output
+
+Note - in the real world we never use http basic we always go with the https to make sure that what we send on the wire is encrypted and https makes it sure
+
+How to create own set of credentials Basic [prefer example project 1]
+1. Create own user details service , it is a component that manages user details
+   the component which we create in the application to tell the spring security where to get the user details
+2. Add bean in the context of type userDetailService it is an interface that defines spring security that it is a manager of the user credentials, we have
+   different types of managers which extends or implements UserDetailsService
+3. In this contract we have a method which takes the userName which is unique identifier and provides the userDetails which is the everything which
+   applications needs to know about the user
+4. Create the user with the user class provided by spring security
+5. Create the own password encoder Bean
+
+Note - If we crete our own user management spring security will not provide the randomly generated password
+
+Authentication architecture
+. Spring security starts in the web applications from the filters
+. Filters -> Servlets -> FrontController -> then rest of the spring boot flow
+. whenever the request enters in the filterChain which is the chain of multiple filters then authentication filter delegates to the AuthenticationManager
+. then authentication manager is an object whose purpose is to find the way in which they can authenticate the users
+. Authentication manager is implemented by the objects called authenticationProviders
+. We do have only one authentication manager but we can have one or more authentication providers.
+. Whenever authentication provider needs an username and password it uses two components 1. userDetailsService and 2. PasswordEncoder
+. and if authentication is successful then it stores the authentication object in the security context
+
+AuthenticationFilter -> AuthenticationManager -> AuthenticationProvider -> UserDetailsService
+                                                                        -> PasswordEncoder
+
+UserDetailsService -> [prefer example project 2]
+. In the user details service we have only one method called loadUserByUserName(String userName)
+. which will take the username and return the userDetails object
+. that's what we need to implement
+. to implement loadUserByUserName we have so many options but we will go with the loading the user from db
+. then we need to create a service class which implements UserDetailsService and then implement the loadUserByUserName and in the implementation we load the
+  user by username from the db
+. so when we load the user from db it will be in the user entity
+. and spring security only understand the users which are in userDetails object
+. so we need to implement userDetails interface with our entity class indirectly by using dto's or by using adapter pattern in which we adapt the entity
+  to desired interface
+
+Authorities -> Authorities is the list of actions which user can do
+. UserDetails object has one field called GrantedAuthorities
+. and authorities are represented as authorities and roles
+. it is just a conceptional difference but behind the scene it is the same nothing is different
+. authorities means actions -> read, write , delete
+. roles means it is a badge -> admin , client, manager, visitor
+. basically its same , like how we want to implement the authorization based on actions or badges
+
+
+
+
+
+
 
