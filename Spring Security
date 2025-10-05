@@ -47,7 +47,7 @@ Difference between Encoding, Encryption and Hsh Functions
 
 Note - in the real world we never use http basic we always go with the https to make sure that what we send on the wire is encrypted and https makes it sure
 
-How to create own set of credentials Basic [prefer example project 1]
+How to create own set of credentials Basic [refer example project 1]
 1. Create own user details service , it is a component that manages user details
    the component which we create in the application to tell the spring security where to get the user details
 2. Add bean in the context of type userDetailService it is an interface that defines spring security that it is a manager of the user credentials, we have
@@ -72,7 +72,7 @@ Authentication architecture
 AuthenticationFilter -> AuthenticationManager -> AuthenticationProvider -> UserDetailsService
                                                                         -> PasswordEncoder
 
-UserDetailsService -> [prefer example project 2]
+UserDetailsService -> [refer example project 2]
 . In the user details service we have only one method called loadUserByUserName(String userName)
 . which will take the username and return the userDetails object
 . that's what we need to implement
@@ -91,6 +91,18 @@ Authorities -> Authorities is the list of actions which user can do
 . authorities means actions -> read, write , delete
 . roles means it is a badge -> admin , client, manager, visitor
 . basically its same , like how we want to implement the authorization based on actions or badges
+
+Defining custom authentication mechanism [refer example project 3]
+1. Create custom Filter, Authentication manager, Authentication provider, authentication.
+2. In the config class override the bean for filterChain and add the custom filter in the filter chain
+3. Override the filter method of the custom filter by using authenticationManager
+4. In the authentication manager provides the provider which supports the custom authentication
+5. In the provider write the logic for authenticating the authentication object
+6. Once object is authenticated save the authentication object in the security context
+7. After that we can send the request in the next filter by doFilter method from the filterChain
+
+
+
 
 
 
