@@ -72,6 +72,8 @@ Authentication architecture
 AuthenticationFilter -> AuthenticationManager -> AuthenticationProvider -> UserDetailsService
                                                                         -> PasswordEncoder
 
+---
+
 UserDetailsService -> [refer example project 2]
 . In the user details service we have only one method called loadUserByUserName(String userName)
 . which will take the username and return the userDetails object
@@ -91,6 +93,8 @@ Authorities -> Authorities is the list of actions which user can do
 . authorities means actions -> read, write , delete
 . roles means it is a badge -> admin , client, manager, visitor
 . basically its same , like how we want to implement the authorization based on actions or badges
+
+---
 
 Defining custom authentication mechanism [refer example project 3]
 1. Create custom Filter, Authentication manager, Authentication provider, authentication.
