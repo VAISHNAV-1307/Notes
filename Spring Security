@@ -105,6 +105,13 @@ Defining custom authentication mechanism [refer example project 3]
 6. Once object is authenticated save the authentication object in the security context
 7. After that we can send the request in the next filter by doFilter method from the filterChain
 
+Architectural diagram : Custom Authentication obj -> Custom Filter impl -> Custom Manager impl -> Custom Provider impl
+
+---
+
+Implementing multiple authentication providers by implementing httpBasic(default) and custom authentication(api key) [refer example project 4]
+
+
 
 
 
