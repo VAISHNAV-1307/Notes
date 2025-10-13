@@ -110,6 +110,14 @@ Architectural diagram : Custom Authentication obj -> Custom Filter impl -> Custo
 ---
 
 Implementing multiple authentication providers by implementing httpBasic(default) and custom authentication(api key) [refer example project 4]
+HttpBasic -> When we create the bean of httpBasic what will happen behind the scenes the security configurer is created and
+             filters will be created and authentication manager, Authentication provider will be created with the default values we can change there values
+             as well while creating the bean of the security filter chain and according the our provided config the whole structure will get created.
+
+For adding more authentication logic , we need to write the different logics through which we want to authenticate our request and then we can
+configure it in security configurations.
+
+
 
 
 
