@@ -154,10 +154,11 @@ Authorization Rules in Detailed
 6. hasRole()
 7. hasAnyRole()
 
+---
 
-
-
-
+Note - 401 means authentication fails
+       403 means authorization fails
+       there messages are vise-versa but dont get confuse
 
 
 
