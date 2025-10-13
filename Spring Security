@@ -117,6 +117,16 @@ HttpBasic -> When we create the bean of httpBasic what will happen behind the sc
 For adding more authentication logic , we need to write the different logics through which we want to authenticate our request and then we can
 configure it in security configurations.
 
+---
+
+There are two types of authorization - 1. End point level authorization -> Done through the filter chain
+                                      - 2. Method level authorization -> Done through the AOP
+In the web apps we used end point level authorization
+
+End point level authorization
+- End point level authorization will happen through the filter chain and this is where the rules are applied
+
+
 
 
 
