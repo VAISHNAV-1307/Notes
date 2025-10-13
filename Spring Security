@@ -123,8 +123,38 @@ There are two types of authorization - 1. End point level authorization -> Done 
                                       - 2. Method level authorization -> Done through the AOP
 In the web apps we used end point level authorization
 
+---
+
 End point level authorization
+- Architecture -> AuthenticationFilter - SecurityContext - AuthorizationFilter
+
 - End point level authorization will happen through the filter chain and this is where the rules are applied
+- there is a method in the httpBasic called authorizedRequest which will specify the filter that how the request need to be authorized
+  so when we called an endpoint basis on this specifications our request will get passed or not in the authorization before reaching out the controllers
+- The authorization is divided in two parts
+- anyRequest() -> Matcher method
+  authenticated() -> Authorization rule
+- anyRequest().authenticated() -> This complete means after the authentication whatever user there is in the security context that user is authorized
+
+Authorization Rules in Detailed
+1. authenticated() -> This means all the users which are authenticated are authorized
+2. permitAll() -> - This means even the authentication is also not needed you can permit whatever comes in
+                  - however this will allow without auth but if you tries to access it with the wrong username or password this will not allow you
+                  - cause the authentication that the httpRequest goes into authentication filter and when the authentication request is successful
+                    it will create the securityContext and then the authorization filter applies , so it will always be the authentication before authorization
+                    ,so when we go with the no auth it will completely skip the proceeder and the endpoint if is marked as permit all then the authorization
+                    will allow.
+                  - But if we say we want to go with the basic or any other authentication then the authentication filter tries to authenticate you and that's
+                    before the authorization filter can check that the rule is permit all and it will directly get thrown out of the filterChain and request
+                    never reaches the authorization filter where it can check that rule is permit all so it can allow the request
+3. denyAll() -> Which means denyAll the request, which really didn't make any sense in the real world application, we can use it to denyAll the request
+                which are not specifically mentioned or denyAll the request which are specifically mentioned
+4. hasAuthority()
+5. hasAnyAuthority()
+6. hasRole()
+7. hasAnyRole()
+
+
 
 
 
