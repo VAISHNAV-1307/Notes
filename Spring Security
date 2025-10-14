@@ -138,7 +138,7 @@ End point level authorization
 
 ---
 
-Authorization Rules in Detailed
+Authorization Rules in Detailed [refer ex - 5]
 - It will specify the rules for authorization which user should have
 1. authenticated() -> This means all the users which are authenticated are authorized
 2. permitAll() -> - This means even the authentication is also not needed you can permit whatever comes in
@@ -161,8 +161,14 @@ Authorization Rules in Detailed
 
 ---
 
-Matcher methods in details
+Matcher methods in details [refer ex - 6]
 - It will specify for which api endpoints, we are doing this authorization rule check
+- requestMatchers(String patterns) -->
+  - With this we can specify which apis we need to authorize and which authorization rules should get applied on the specific apis
+    we can specify different rules for different apis, we can specify it in the patterns as well
+  - most of the times we need a group of apis having same authorization rules so at that time we generally specify the common prefix of all the apis
+    in the requestMatchers input.
+
 
 
 
