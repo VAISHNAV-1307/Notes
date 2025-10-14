@@ -136,7 +136,10 @@ End point level authorization
   authenticated() -> Authorization rule
 - anyRequest().authenticated() -> This complete means after the authentication whatever user there is in the security context that user is authorized
 
+---
+
 Authorization Rules in Detailed
+- It will specify the rules for authorization which user should have
 1. authenticated() -> This means all the users which are authenticated are authorized
 2. permitAll() -> - This means even the authentication is also not needed you can permit whatever comes in
                   - however this will allow without auth but if you tries to access it with the wrong username or password this will not allow you
@@ -149,10 +152,28 @@ Authorization Rules in Detailed
                     never reaches the authorization filter where it can check that rule is permit all so it can allow the request
 3. denyAll() -> Which means denyAll the request, which really didn't make any sense in the real world application, we can use it to denyAll the request
                 which are not specifically mentioned or denyAll the request which are specifically mentioned
-4. hasAuthority()
-5. hasAnyAuthority()
-6. hasRole()
-7. hasAnyRole()
+4. hasAuthority (GrantedAuthorities authority) -> Allow the users having mentioned authority
+5. hasAnyAuthority (List<GrantedAuthority> authorities) -> Allow the users having mentioned authorities
+6. hasRole (GrantedAuthorities authority) -> Allow the users having mentioned Role
+7. hasAnyRole (List<GrantedAuthority> authorities) -> Allow the users having mentioned role.
+8. access(new WebExpressionAuthorizationManager(String rule)) -> we can specify the authorization rule in form of SpEL in the string input and we can
+                                                                 define the complex logics over there. Its very powerful rule.
+
+---
+
+Matcher methods in details
+- It will specify for which api endpoints, we are doing this authorization rule check
+
+
+
+
+
+---
+
+Notes -> To define the Role we have a grantedAuthority contract which is used to define both role as well as authorities.
+         So to define the roles we can define it like in the authorities field of user class we can define the role as ROLE_ADMIN, ROLE_DEVELOPER
+         or we can directly use the role field of user class and define the role directly as ADMIN
+         implicitly role field is doing the same by creating the granted authority by adding the prefix as ROLE
 
 ---
 
