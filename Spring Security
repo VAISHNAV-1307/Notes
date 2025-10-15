@@ -168,11 +168,13 @@ Matcher methods in details [refer ex - 6]
     we can specify different rules for different apis, we can specify it in the patterns as well
   - most of the times we need a group of apis having same authorization rules so at that time we generally specify the common prefix of all the apis
     in the requestMatchers input.
-
-
-
-
-
+  - Some Imp Ant expressions ->
+    - * means anything only once and ** means all the path is anything
+        . /demo/** -> This means all the path after demo prefix
+        . /demo/* -> This means only one anything after demo
+        . /demo/anything/*/something -> This means demo after that anything after that any api and after that something
+  - In the requestMatchers we can specify the method as well let say we want to apply the rule for only GET apis with the particular prefix then we can
+    specify it in the method parameters
 
 ---
 
@@ -186,6 +188,10 @@ Notes -> To define the Role we have a grantedAuthority contract which is used to
 Note - 401 means authentication fails
        403 means authorization fails
        there messages are vise-versa but dont get confuse
+       Authorities are on server side always, we did not send it through headers or somehow
+
+---
+
 
 
 
