@@ -192,6 +192,23 @@ Note - 401 means authentication fails
 
 ---
 
+Method based authorization [Aspect based] [Refer Example - 7]
+- We can apply authorization directly on service level and on any bean.
+- method level authorization is also used the security context info
+- for the method level authorization we can use the @PreAuthorize Annotation on top of method and there we can specify the authorization rules
+    - We have four annotation to define method level authorization
+      1. PreAuthorize
+      2. PostAuthorize
+      3. PreFilter
+      4. PostFilter
+- By adding this annotation we make sure this conditions are get evaluated by spring AOP
+- we can specify the rules same as we do it in the case of request matchers like hasAuthority or hasAnyAuthority and before reaching out to that method
+  it will check that the user is fulfilling the authorization requirements or not
+- And to use the Pre and PostAuthorization annotation we need to sure that we are enabling the aspects for spring.
+- So to enable the Aspects we need to use the @EnableMethodSecurity annotation on top of SecurityConfig class
+
+
+
 
 
 
