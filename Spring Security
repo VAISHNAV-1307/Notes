@@ -197,15 +197,23 @@ Method based authorization [Aspect based] [Refer Example - 7]
 - method level authorization is also used the security context info
 - for the method level authorization we can use the @PreAuthorize Annotation on top of method and there we can specify the authorization rules
     - We have four annotation to define method level authorization
-      1. PreAuthorize
-      2. PostAuthorize
-      3. PreFilter
-      4. PostFilter
+      1. PreAuthorize -> Authorize before method execution
+      2. PostAuthorize -> Authorize after method execution and before return
+      3. PreFilter -> Works with collection and array, it will filter the values send to the method based on condition
+      4. PostFilter -> works only when return type is collection or array and filter out the returning object based on the condition
 - By adding this annotation we make sure this conditions are get evaluated by spring AOP
 - we can specify the rules same as we do it in the case of request matchers like hasAuthority or hasAnyAuthority and before reaching out to that method
   it will check that the user is fulfilling the authorization requirements or not
 - And to use the Pre and PostAuthorization annotation we need to sure that we are enabling the aspects for spring.
 - So to enable the Aspects we need to use the @EnableMethodSecurity annotation on top of SecurityConfig class
+
+---
+
+Method based authorization [refer Example - 7]
+- From the filter level authorization we cannot access the other things in the url like path variables, request body or request parameters
+- on the method level security we can apply different rules on parameters as well
+- post authorize we mainly use when we don't want to interrupt the execution but want to restrict the value which is getting returned.
+- in general use we don't use postAuthorize in real world application
 
 
 
