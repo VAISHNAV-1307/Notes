@@ -215,6 +215,29 @@ Method based authorization - part 2 [refer Example - 7]
 - post authorize we mainly use when we don't want to interrupt the execution but want to restrict the value which is getting returned.
 - in general use we don't use postAuthorize in real world application
 
+---
+
+OAuth2 and openID connect
+User                 -> User is the person who is sending the request to access the information in the resource server
+                      . User is not mandatory it can be the API's which are trying to access the information or can be anything which are trying
+                        to access the information from the resource server.
+client               -> It is the front end application or any application through which user is sending the request for accessing information
+Authorization server -> It is the server where all the  authentication logic is present and if authentication condition passes then only
+                        authorization server is allowing user to access the information in the resource server
+                      . The one of main reason to have the separate Authorization server from the resource server is that we don't want to store
+                        the user details and all that information related to it in the resource server
+                      . It manages the users and clients.
+Resource Server      -> It is the server which is responsible for providing the resource info which user is asking, in simple words it is the backend
+                        application
+                       . Authentication part is taken care at the end of Authorization Server and Authorization part is taken care at the end of
+                       Resource Server
+
+Flow ->
+User sends the request to the client then client send that request to the Authorization server authorization server validates the request and if
+authentication is completed then send some information in form of tokens to the client then client send that info to the Resource server and then
+based on information in the token Resource server can authorize the request and then send back the appropriate information to the user
+
+
 
 
 
