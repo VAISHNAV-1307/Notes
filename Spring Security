@@ -227,6 +227,8 @@ Authorization server -> It is the server where all the  authentication logic is 
                       . The one of main reason to have the separate Authorization server from the resource server is that we don't want to store
                         the user details and all that information related to it in the resource server
                       . It manages the users and clients.
+                      . When we go to an office building first time, we explain our identity and we get card which is token in our case, that card
+                        opens some doars for us not all the doars based on privileges and that's how Authorization server works.
 Resource Server      -> It is the server which is responsible for providing the resource info which user is asking, in simple words it is the backend
                         application
                        . Authentication part is taken care at the end of Authorization Server and Authorization part is taken care at the end of
@@ -236,6 +238,64 @@ Flow ->
 User sends the request to the client then client send that request to the Authorization server authorization server validates the request and if
 authentication is completed then send some information in form of tokens to the client then client send that info to the Resource server and then
 based on information in the token Resource server can authorize the request and then send back the appropriate information to the user
+1. how does client get a token (grant types)
+2. how does the resource server (backend) validate and get the data with the token
+
+Ways to obtain the token are called grant types
+1. Authorization code (PKCE) [Please refer the diagram]
+    - User sends the request to the client
+    - Client redirect it to the login page
+    - Login page is managed at the Authorization server
+    - then user logged in using user credentials
+    - if log in is successful Authorization server redirects the user to the redirecting URL provided by client with the authorization code
+    - now client implicitly sends back the request to the authorization server with the authorization code and the client credentials
+    - client credentials are stored at the end of client
+    - and then finally Authorization server sends the access token
+    - Use of PKCE -> it comes into picture cause we cannot save the client credentials on client server as it is the public, so that's were we can
+                     use PKCE to store the client credentials
+
+2. Client credentials
+    - It comes into to picture were we don't have a user or we have another backend service or kubernetes which we need to authenticate for authorization
+      server in this case that backend service becomes the client for the authorization server
+    - In this case we use the client credentials
+    - It is very simple
+    - We just sent the client credentials to the authorization server from client
+    - and then we get back the access token
+    - We just need to take care that we don't allow client credentials for all the endpoints
+3. Refresh token
+    - The purpose of this refresh token, is allow the user to get the token without logging in again in the same session
+    - When user tries to get something and access token is no longer valid now if we don't have a refresh token concept then user has to go to the all
+      the process of authorization grant type again so we want to avoid that user needs to log in again and again in 15 or 20 mins
+    - so instead we have a refresh token and the application memorize it and it sends the refresh token and if the refresh token is valid one
+      application will send the new access token and refresh token with it.
+    - and then app can do the same process again and again
+    - We can expire the refresh token as well so user needs to do the login after particular period of time
+4. Implicit, Password --> DEPRECATED DO NOT USE
+
+
+Tokens -->
+- Tokens are qualifies as opaque and non-opaque tokens
+- Tokens should help the Resource server to apply the authorization rules
+    - Opaque tokens -> are by definition tokens that don't contain any data
+        . In case of opaque tokens the Authorization server will always implements the introspection endpoint
+        . the introspection endpoint is and endpoint which gets a token and returns the details about that token
+        . Information means not only that token is valid or not but info about the user that will be used by resource server to apply the authorization
+          rules
+        . means will get the token were we don't have values inside them but we can use the introspection endpoints to get the details about the token
+        . in this case resource server always introspect the token to get the details about it.
+    - Non-opaque tokens -> are the tokens that contains data [JWT is implementation of non-opaque tokens]
+        . Lets stick to JWT for opaque tokens in practice will always use the jwt tokens as the opaque tokens
+        . so JWT tokens is not only piece of string
+        . its base64 encoding of a json
+        . its composed of three parts and where third part is actually called a signature
+        . the third part which is signature is offering a security over the header and the body which contains the information
+        . but also on the token indeed which proves that token is created by the authorization server
+        . because if the token is opaque one for the resource server it is very easy to find out if the token is valid or not
+        . cause when the resource server called the introspection endpoint authorization server will tell that it is not valid
+        . but in case of non-opaque token which contains the information inside resource server will not call the authorization server
+        . because token is sign and resource server will be configured with the key that can validate the signature
+        . so in non-opaque tokens case what will happen client will send the non-opaque token and resource server will validate the signature
+          and directly get the information inside the token and we do not need to introspect it with the authorization server
 
 
 
