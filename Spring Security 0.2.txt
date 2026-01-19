@@ -1,0 +1,10 @@
+
+                                                                        || जय शंकर ||
+
+- When we use the spring security dependency the first thing spring application look for is SecurityFilterChain
+- the default implementation is from spring.web
+- and in by default spring provides default securityFilterChain and under the hood it has the configurations of httpBasic with any request should be
+  authenticated with formLogin and in case if form login is not working then use httpBasic
+
+- Config class
+- we annotate the config class with @EnableWebSecurity annotation so the spring security will know that it is the config class
