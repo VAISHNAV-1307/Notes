@@ -6,5 +6,34 @@
 - and in by default spring provides default securityFilterChain and under the hood it has the configurations of httpBasic with any request should be
   authenticated with formLogin and in case if form login is not working then use httpBasic
 
-- Config class
+* Config class
 - we annotate the config class with @EnableWebSecurity annotation so the spring security will know that it is the config class
+
+* JWT
+- JWT Design [refer diagram]
+1. Client send HTTP request to our backend application
+2. the first thing which gets executed in spring boot application is SecurityFilter
+3. In this case first thing which will get executed is our JWT authentication filter
+4. and it is once per request filter
+5. and has role to validate everything regarding JWT token that we have
+6. Will have a JWT auth filter where we can check that API have JWT token or not so if token is missing will send 403 un-authorize response to client
+7. and if http request has JWT token then will start the validation process
+8. Filter in internal execution process will make call to UserDetailsService and try to fetch user information from database
+9. JWT authentication filter will check the JWT token, extract the username or email, or we call it as a subject in terms of JWT
+10. And it will use that details to fetch the user details information from our database
+11. Once user is fetched we have the response from our database
+12. and response can be either way. it can be the existing user or non-existing user
+13. Once we get the response in JWT authentication filter here we will make few checks
+14. Which is if user does not exist we will again send 403 un-authorize to client
+15. In case everything is fine, and we get our user then we will start the validation process
+16. Now JWT token is generated for specific user, we want to validate this token based on the user
+17. for this we have a JWT validation mechanism which will call a JWT service
+18. Now this JWT service takes parameter of user and JWT token
+19. After validation process we have two scenarios if validation is not successful in case token is expired or token is not for that specific user so will send
+    403 to client
+20. In case of successful validation we will call the securityContext holder and set this connected user
+21. because when we fetch the user information from the userDetailsService we will be able to tell the rest of filter chain that this user is authenticated
+22. so if everytime we check for this request is user is authenticated then the answer will be yes
+23. and once securityContextHolder is updated then it will automatically re-directs the request to the dispatcher servlet
+24. and from the dispatcher servlet it will be sent directly to the controller and it will do all the execution that we need to do
+25. and then we can send back the json response to the client
