@@ -35,5 +35,20 @@
 21. because when we fetch the user information from the userDetailsService we will be able to tell the rest of filter chain that this user is authenticated
 22. so if everytime we check for this request is user is authenticated then the answer will be yes
 23. and once securityContextHolder is updated then it will automatically re-directs the request to the dispatcher servlet
-24. and from the dispatcher servlet it will be sent directly to the controller and it will do all the execution that we need to do
+24. and from the dispatcher servlet it will be sent directly to the controller, and it will do all the execution that we need to do
 25. and then we can send back the json response to the client
+
+* Implementation
+1. UserDetails Service
+- When Spring security starts and sets up the application it will use an object called userDetailsService
+- and this is interface which contains a bunch of methods
+- and whenever we are using spring security we need to ensure that we are providing userDetailsService
+- to do this we need to implement the userDetails interface with our User entity
+- and implement the methods in the userDetails interface
+
+2. SecurityFilter
+- Then we need to create our own filter object
+- and implement it with the OncePerRequestFilter so every httpRequest will go through that filter
+- and implement the methods inside oncePerRequestFilter class
+
+
