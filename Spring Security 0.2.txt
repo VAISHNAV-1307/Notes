@@ -51,4 +51,39 @@
 - and implement it with the OncePerRequestFilter so every httpRequest will go through that filter
 - and implement the methods inside oncePerRequestFilter class
 
+* For doing the JWT related operations we need to add one more JWT dependency in our application
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>0.11.5</version>
+    </dependency>
+
+* JWT Tokens
+- JWT token stands for json web token which means of representation of representing claims to be transferred between two parties
+- claims in JWT are encoded as Json object that is digitally signed using a json web signature
+- JWT consists of three parts
+    1. Header -> Header consists two parts
+        a. type -> JWT
+        b. Sign-in algorithm -> HMAC
+    2. Payload -> This contains claims
+               - Claims are statements about an entity user
+               - There are three types of claims Registered, public and private
+               - Registered claims are predefined claims which are not mandatory but recommended to provide set of useful and repeatable claims
+               - Public claims are the claims which are defined within IA and A json web token registry or public by nature
+               - Private claims are the custom claims created to share the information between parties that agreed using them
+    3. signature -> Signature is used to verify the center of the JWT who it is claims to be and to ensure that it is not changed along the way
+
+- When we try to extract a token we need a signing key
+
+
 
