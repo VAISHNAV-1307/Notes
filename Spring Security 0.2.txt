@@ -84,6 +84,11 @@
     3. signature -> Signature is used to verify the center of the JWT who it is claims to be and to ensure that it is not changed along the way
 
 - When we try to extract a token we need a signing key
+- Signing key -  . is secret that is used to digitally signed JWT , this signing key is used to create the signature part of JWT which used to verify that
+                 sender of the JWT is who it claims to be and ensure that the message wasn't changed along the way so we want to ensure that the same person
+                 or the same client that is sending JWT key is the one that claims who to be.
+                 . We can use external tools to generate signing keys
+
 
 
 
