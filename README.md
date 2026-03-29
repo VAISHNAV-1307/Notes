@@ -1,13 +1,3 @@
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Calibri', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-</style>
-
 # Java Learning Notes
 
 A comprehensive collection of Java and Spring framework notes for software development learning and reference.
