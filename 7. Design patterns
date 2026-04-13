@@ -1,0 +1,62 @@
+SOLID principles
+1. Single Responsibility Principle
+    - A class should have only one reason to change.
+    - Every class should do exactly one thing. If it handles more than one concern, split it up.
+    - In Spring Boot Controller handles HTTP, Service handles business logic, Repository handles DB. That separation IS SRP in action.
+    - ex :
+        public class UserRepository {
+          public void save(String name,
+                           String email) {
+            db.save(name, email);
+          }
+        }
+
+        public class EmailService {
+          public void sendWelcome(
+                String name, String email) {
+            emailClient.send(
+              email, "Welcome " + name);
+          }
+        }
+
+        public class UserLogger {
+          public void logCreated(String name){
+            logger.info(
+              "User created: " + name);
+          }
+        }
+
+    - Do not do this :
+        public class UserService {
+
+          public void createUser(String name,
+                                 String email) {
+            // 1. Save to DB
+            db.save(name, email);
+
+            // 2. Send welcome email
+            emailClient.send(
+              email,
+              "Welcome " + name
+            );
+
+            // 3. Write to log
+            logger.info(
+              "User created: " + name
+            );
+          }
+        }
+
+    - simple thing we can apply to any class, we can check "what are the reasons this class might change?" If you can list more than one answer, it's an SRP violation.
+    - A quick rule of thumb for each Spring Boot layer:
+        . @RestController — only reads request, calls service, returns response. Nothing else.
+        . @Service — only orchestrates or contains one specific piece of business logic
+        . @Repository — only talks to the DB. No if-else, no formatting, no external calls
+        . @Component — one focused utility (formatting, validation, encoding, etc.)
+
+
+    
+
+
+
+
