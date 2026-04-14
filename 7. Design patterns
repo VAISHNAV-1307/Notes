@@ -54,9 +54,228 @@ SOLID principles
         . @Repository — only talks to the DB. No if-else, no formatting, no external calls
         . @Component — one focused utility (formatting, validation, encoding, etc.)
 
+2. Open/Closed Principle
+    - Open for extension, closed for modification.
+    - Add new features by writing new code — never by editing existing, tested, working code. Use interfaces and polymorphism.
+    - Ex :
+        Good — add new type = new class only
 
-    
+        public interface PaymentGateway {
+          void pay(double amount);
+        }
 
+        public class UpiPayment
+               implements PaymentGateway {
+          public void pay(double amount) {
+            System.out.println(
+              "Paid via UPI: " + amount);
+          }
+        }
 
+        public class CardPayment
+               implements PaymentGateway {
+          public void pay(double amount) {
+            System.out.println(
+              "Paid via Card: " + amount);
+          }
+        }
+
+        // Add PayPal? Just new class.
+        // Zero changes to existing code.
+
+    - Do not do this
+        Bad — add new type = edit old code
+
+        public class PaymentService {
+
+          public void pay(String type,
+                          double amount) {
+            if (type.equals("UPI")) {
+              System.out.println(
+                "Paid via UPI: " + amount);
+            } else if (type.equals("CARD")) {
+              System.out.println(
+                "Paid via Card: " + amount);
+            }
+            // Add PayPal?
+            // You MUST edit this class!
+          }
+        }
+
+3. Liskov Substitution Principle
+   - Subclasses must be substitutable for their parent class without breaking the program.
+   - If class B extends class A, you should be able to use B anywhere A is used — and nothing should break or surprise you.
+   - Ex :
+        Good — honest, independent classes
+        public interface Shape {
+          int area();
+        }
+
+        public class Rectangle
+               implements Shape {
+          private int width, height;
+
+          public Rectangle(int w, int h) {
+            this.width = w;
+            this.height = h;
+          }
+          public int area() {
+            return width * height;
+          }
+        }
+
+        public class Square
+               implements Shape {
+          private int side;
+
+          public Square(int side) {
+            this.side = side;
+          }
+          public int area() {
+            return side * side;
+          }
+        }
+        // Both implement Shape.
+        // No surprises. No overrides.
+
+        - Do not do this
+        Bad — subclass breaks parent's contract
+        public class Rectangle {
+          protected int width, height;
+
+          public void setWidth(int w) {
+            this.width = w;
+          }
+          public void setHeight(int h) {
+            this.height = h;
+          }
+          public int area() {
+            return width * height;
+          }
+        }
+
+        public class Square extends Rectangle {
+          // Breaks LSP! Square forces both sides equal — but caller doesn't know that.
+          public void setWidth(int w) {
+            this.width = w;
+            this.height = w; // surprise!
+          }
+        }
+
+4. Interface Segregation Principle
+    - No class should be forced to implement methods it doesn't need.
+    - Split fat interfaces into smaller, focused ones. A class should only implement what it actually uses — not carry dead weight.
+    - Ex :
+        Good — small focused interfaces
+        public interface Workable {
+          void work();
+        }
+
+        public interface Eatable {
+          void eat();
+        }
+
+        public interface Sleepable {
+          void sleep();
+        }
+
+        // Human implements all three
+        public class Human implements
+          Workable, Eatable, Sleepable {
+          public void work()  { /*...*/ }
+          public void eat()   { /*...*/ }
+          public void sleep() { /*...*/ }
+        }
+
+        // Robot only implements what it needs
+        public class Robot
+               implements Workable {
+          public void work() {
+            System.out.println("Working...");
+          }
+        }
+
+    - Do not do this
+        Bad — fat interface forces junk methods
+        public interface Worker {
+          void work();
+          void eat();
+          void sleep();
+        }
+
+        // Robot doesn't eat or sleep!
+        // But is FORCED to implement them.
+        public class Robot implements Worker {
+          public void work() {
+            System.out.println("Working...");
+          }
+          public void eat() {
+            // meaningless — robots don't eat
+          }
+          public void sleep() {
+            // meaningless — robots don't sleep
+          }
+        }
+
+5. Dependency Inversion Principle
+    - High-level modules should not depend on low-level modules.
+    - Both should depend on abstractions.
+    - High-level module → business logic (what your app does)
+    - Low-level module → implementation details (database, APIs, file system, etc.)
+    - Depend on "what it does", not "how it does it"
+    - DIP says:
+        . Your business logic should NOT depend directly on concrete implementations.
+        . Instead, both should depend on interfaces / abstractions.
+    - Without DIP (Bad Design)
+      Example: Order system
+      class MySQLDatabase {
+          void save(String data) {
+              System.out.println("Saved to MySQL");
+          }
+      }
+
+      class OrderService {
+          private MySQLDatabase db = new MySQLDatabase();
+
+          void placeOrder() {
+              db.save("order data");
+          }
+      }
+
+    // Problems:
+    // OrderService is tightly coupled to MySQLDatabase
+    // Switching to PostgreSQL? You must change OrderService
+    // Hard to test (no mocking)
+
+    - With DIP (Good Design)
+    Step 1: Create abstraction
+    interface Database {
+        void save(String data);
+    }
+
+    Step 2: Low-level implements abstraction
+    class MySQLDatabase implements Database {
+        public void save(String data) {
+            System.out.println("Saved to MySQL");
+        }
+    }
+
+    Step 3: High-level depends on abstraction
+    class OrderService {
+        private Database db;
+
+        OrderService(Database db) {
+            this.db = db;
+        }
+
+        void placeOrder() {
+            db.save("order data");
+        }
+    }
+
+    Step 4: Inject dependency
+    Database db = new MySQLDatabase();
+    OrderService service = new OrderService(db);
+    service.placeOrder();
 
 
