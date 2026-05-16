@@ -721,8 +721,8 @@ How to access the array element
 
 Why array index starts from zero
 - Array variables points towards the base address where all elements are stored sequentially
-- first element = baseAddress + size of dataType in bytes  0
-- Second element = baseAddress + size of dataType in bytes  1
+- first element = baseAddress + size of dataType in bytes * 0
+- Second element = baseAddress + size of dataType in bytes * 1
 
 Drawbacks of arrays
 - Fixed in nature
@@ -788,7 +788,7 @@ Why do we need them -> In java String is a immutable class the problem with the 
 - This are more memory efficient for frequent concatenation or String operations
 
 - Common methods used in both the classes
-| Method                              | Description                                           |
+| Method                                  | Description                                           |
 | --------------------------------------- | --------------------------------------------------------- |
 | append(String str)                      | Adds string to the end                                    |
 | insert(int offset, String str)          | Inserts string at specified index                         |
