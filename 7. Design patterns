@@ -278,4 +278,326 @@ SOLID principles
     OrderService service = new OrderService(db);
     service.placeOrder();
 
+------------------------------------------------------------------------------------------------------------------------
+
+* Design patterns
+    - Design patterns are reusable solutions to common software design problems.
+
+    They are:
+    not libraries
+    not frameworks
+    not copy-paste code
+    They are proven ways to structure code.
+
+1. Creational Design Patterns
+   - Creational patterns solve one main problem:
+     How should objects be created ?
+     Instead of creating objects directly everywhere using new, these patterns provide controlled, flexible, and maintainable ways to create objects.
+
+     1. Singleton Pattern
+        - Purpose : Ensure only one object of a class exists in the entire application.
+        - Used when a single shared instance is needed.
+        - Real-Life Example
+            . Printer manager
+            . Database connection manager
+            . Logger
+            . Spring Beans (default scope)
+        - Ex : public class Singleton {
+
+                   private static Singleton instance;
+
+                   private Singleton() {
+                   }
+
+                   public static Singleton getInstance() {
+
+                       if (instance == null) {
+                           instance = new Singleton();
+                       }
+
+                       return instance;
+                   }
+               }
+
+        - Problem It Solves
+          Without Singleton:
+            new DBConnection();
+            new DBConnection();
+            new DBConnection();
+
+          This may:
+            . waste memory
+            . create inconsistent state
+            . create multiple expensive resources
+
+          Singleton ensures:
+            . one shared object
+            . centralized access
+
+        - Spring Boot Example
+            . Spring beans are Singleton by default.
+
+              @Service
+              public class UserService {
+              }
+
+            . Spring creates only one instance unless scope changes.
+
+        - Drawbacks
+            . Harder to test
+            . Global state
+            . Thread safety issues if implemented poorly
+
+    2. Builder Pattern
+        - Purpose : Create complex objects step by step.
+        - Useful when constructors become huge.
+        - Problem Without Builder
+            User user = new User(
+                "Bhau",
+                25,
+                "Pune",
+                "Java",
+                "Spring Boot",
+                true,
+                false
+            );
+        - Problems:
+            . hard to read
+            . parameter order confusion
+            . optional fields become messy
+        - Builder Solution
+            public class User {
+
+                private String name;
+                private int age;
+                private String city;
+
+                private User(UserBuilder builder) {
+                    this.name = builder.name;
+                    this.age = builder.age;
+                    this.city = builder.city;
+                }
+
+                public static class UserBuilder {
+
+                    private String name;
+                    private int age;
+                    private String city;
+
+                    public UserBuilder setName(String name) {
+                        this.name = name;
+                        return this;
+                    }
+
+                    public UserBuilder setAge(int age) {
+                        this.age = age;
+                        return this;
+                    }
+
+                    public UserBuilder setCity(String city) {
+                        this.city = city;
+                        return this;
+                    }
+
+                    public User build() {
+                        return new User(this);
+                    }
+                }
+            }
+
+        - Usage:
+            User user = new User.UserBuilder()
+                    .setName("Bhau")
+                    .setAge(25)
+                    .setCity("Pune")
+                    .build();
+
+        - Benefits
+            . readable
+            . flexible
+            . avoids constructor explosion
+            . immutable object support
+
+        - Real Spring Example
+            . RestTemplateBuilder
+            . WebClient.Builder
+            . UriComponentsBuilder
+
+    3. Factory Pattern
+        - Purpose : Create objects without exposing exact creation logic.
+        - Instead of:
+            . new Dog();
+            . new Cat();
+        - Use a factory.
+        - Ex :
+            Normal implementation
+            Interface :
+            public interface Animal {
+                void sound();
+            }
+
+            Implementations :
+            public class Dog implements Animal {
+                public void sound() {
+                    System.out.println("Bark");
+                }
+            }
+
+            public class Cat implements Animal {
+                public void sound() {
+                    System.out.println("Meow");
+                }
+            }
+
+            Factory
+            public class AnimalFactory {
+
+                public Animal getAnimal(String type) {
+
+                    if(type.equals("DOG")) {
+                        return new Dog();
+                    }
+
+                    if(type.equals("CAT")) {
+                        return new Cat();
+                    }
+
+                    return null;
+                }
+            }
+
+            Usage :
+                AnimalFactory factory = new AnimalFactory();
+                Animal animal = factory.getAnimal("DOG");
+                animal.sound();
+
+            - Benefits
+                . hides object creation
+                . loose coupling
+                . easy extension
+
+            - Spring Example
+                . BeanFactory
+                . ApplicationContext
+
+    4. Abstract Factory Pattern
+        - Purpose : Create families of related objects.
+        - Factory creates one object.
+        - Abstract Factory creates multiple related objects.
+        - Real-Life Example
+            . You build:
+                Windows UI
+                Mac UI
+
+            . Each platform needs:
+                Button
+                Checkbox
+                TextField
+
+            . Windows family:
+                WindowsButton
+                WindowsCheckbox
+
+            . Mac family:
+                MacButton
+                MacCheckbox
+
+        - Structure
+
+            - Without abstract factory pattern
+            Product Interfaces
+                interface Button {}
+                interface Checkbox {}
+
+            Concrete Products
+                class WindowsButton implements Button {}
+                class MacButton implements Button {}
+                class WindowsCheckbox implements Checkbox {}
+                class MacCheckbox implements Checkbox {}
+
+            - With Abstract Factory
+                interface GUIFactory {
+
+                    Button createButton();
+
+                    Checkbox createCheckbox();
+                }
+
+            Concrete Factories
+                class WindowsFactory implements GUIFactory {
+
+                    public Button createButton() {
+                        return new WindowsButton();
+                    }
+
+                    public Checkbox createCheckbox() {
+                        return new WindowsCheckbox();
+                    }
+                }
+
+        - Benefits
+            . ensures compatible object families
+            . scalable
+            . platform independence
+
+        - Difference from Factory
+            | Factory               | Abstract Factory             |
+            | --------------------- | ---------------------------- |
+            | Creates one product   | Creates families of products |
+            | Simpler               | More complex                 |
+            | One level abstraction | Multiple related objects     |
+
+    5. Prototype Pattern
+        - Purpose : Create new objects by cloning existing objects.
+        - Useful when object creation is expensive.
+        - Real-Life Example
+            Creating a game character:
+                . weapons
+                . powers
+                . skins
+                . stats
+
+            Instead of rebuilding:
+            clone existing character
+        - Example :
+            public class Employee implements Cloneable {
+
+                String name;
+
+                public Employee(String name) {
+                    this.name = name;
+                }
+
+                protected Object clone() throws CloneNotSupportedException {
+                    return super.clone();
+                }
+            }
+
+            - Usage
+            Employee emp1 = new Employee("Bhau");
+
+            Employee emp2 = (Employee) emp1.clone();
+
+            System.out.println(emp1.name);
+            System.out.println(emp2.name);
+
+        - Benefits
+            . faster creation
+            . avoids repeated initialization
+            . useful for expensive objects
+
+        - Important Concept
+          Shallow Copy vs Deep Copy
+            Shallow Copy : Copies references.
+            Deep Copy : Copies actual nested objects.
+
+    - Summary
+        | Pattern          | Main Goal                         |
+        | ---------------- | --------------------------------- |
+        | Singleton        | One object only                   |
+        | Builder          | Build complex object step by step |
+        | Factory          | Centralized object creation       |
+        | Abstract Factory | Create related object families    |
+        | Prototype        | Clone existing objects            |
+
 
