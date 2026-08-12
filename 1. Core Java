@@ -168,7 +168,7 @@ if:
     - if the condition is true then if block is executed.
     - If the condition is false then rest of the code is executed.
 - if can come independently.
-syntax:
+syntax :
         if (condition) {
         // block of statements are executed if the condition is true
         }
@@ -679,7 +679,7 @@ Q What all things we cannot have as a part of interface
 -> Concrete methods that are instance methods
    final methods (cannot override)
    constructor (answer is above)
-   instance block (cannot apply modifiers)
+   instance block (Only initialised when object is created and we cannot create the object of interface)
    static block (common for all & cannot apply modifiers)
    instance variable (obj oriented and we cannot create obj of interface)
    private methods (cannot access outside of class so it can never be overridden so no use)
@@ -721,8 +721,8 @@ How to access the array element
 
 Why array index starts from zero
 - Array variables points towards the base address where all elements are stored sequentially
-- first element = baseAddress + size of dataType in bytes * 0
-- Second element = baseAddress + size of dataType in bytes * 1
+- first element = baseAddress + (size of dataType in bytes * 0)
+- Second element = baseAddress + (size of dataType in bytes * 1)
 
 Drawbacks of arrays
 - Fixed in nature
@@ -752,8 +752,7 @@ Different ways to construct String object
     e.g. String str = "Some value";
 
 Why String class is given when char array is already available ?
-- Storing the group of characters with array of chars
-- is difficult and time-consuming.
+- Storing the group of characters with array of chars is difficult and time-consuming.
 - no method support
 - arrays are fixed in nature
 
@@ -852,7 +851,7 @@ Common characteristics in all List classes
 a. ArrayList [C]
 - It internally uses growable array data structure
 - It creates new array internally, when old array is full
-- Capacity of newly created array = old capacity  1.5 + 1
+- Capacity of newly created array = old capacity * 1.5 + 1
 - the methods in arrayList are non-synchronized methods.
 - We can use the following cursors for retrieval of data : Iterator , ListIterator
 
@@ -865,7 +864,7 @@ b. LinkedList [C]
 c. Vector [C]
 - Vector internally uses growable array data structure
 - It creates new array when old array is full
-- new capacity = old capacity  2
+- new capacity = old capacity * 2
 - Methods are synchronised (Thread Safe) inside the vector
 - it is a legacy class.
 - We can use the following cursors for retrieval of data : Iterator , ListIterator, Enumeration
@@ -972,7 +971,7 @@ Collections class
 - Helps with sorting, searching, synchronizing, shuffling, etc.
 
 - Commonly Used Methods in Collections Class
-Method	Description
+Method	                                                            Description
 sort(List<T> list)	                                                Sorts the specified list into ascending order.
 sort(List<T> list, Comparator<T> c)	                                Sorts with a custom comparator.
 reverse(List<?> list)	                                            Reverses the order of elements in a list.
@@ -995,7 +994,7 @@ e.g., Collection<String> list = new ArrayList<>();	    e.g., Collections.sort(li
 ---
 
 Cursors
-- Cursors are used to travers (iterate over) element of collection
+- Cursors are used to travers (iterate over) elements of collection
 - They are objects which allow us to visit each element in collection sequentially
 - Types of cursors in java
     1. Enumeration
@@ -1533,7 +1532,7 @@ To implement run method we have four ways
 
 start method
 - It is a method which is present inside the thread class which register the thread with the thread schedular and calls the run method
-- If we bypass the start method and directly calls the run method then no new thread will be created as thread is not register with the thread schedular
+- If we bypass the start method and directly calls the run method then no new thread will be created. as thread is not register with the thread schedular
   by start method so it will be normal execution in the main thread only, It will be single threaded application only
 
 Thread life cycle
