@@ -236,7 +236,7 @@ Rest apis
 - Annotations in Spring Boot for REST APIs
 1. @RestController
 Combination of @Controller + @ResponseBody
-Marks a class as a REST controller where each method returns a domain object instead of a view.
+Marks a class as a REST controller where each method returns a json object instead of a view.
 
 2. @RequestMapping
 Used at class or method level to map HTTP requests to handler methods.
@@ -280,8 +280,7 @@ Used for deleting resources.
 # Handling responses in Rest apis
 - Status codes communicate the result of client requests clearly.
 - They are REST API standards, improving readability, debugging, and client handling.
-- If we simply return an object or string, Spring Boot automatically returns:
-  200 OK for successful GET/POST requests
+- If we simply return an object or string, Spring Boot automatically returns : 200 OK for successful GET/POST requests
 - We can use ResponseEntity for Returning responses in Rest apis
 - Response entity allows up sending Http status code, setting Response Body and setting Http Headers
 - Codes start with the 2xx represent the success message, code starts with the 4xx represent the client side error, code starts with the 5xx represents
