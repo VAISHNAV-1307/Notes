@@ -907,7 +907,7 @@ Cascading in JPA
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Transaction Management in Spring
-A transaction is a set of operations that are executed as a single unit. Either all succeed, or none take effect (atomicity).
+A transaction is a set of operations that should get executed as a single unit. Either all succeed, or none take effect (atomicity).
 Example - when transferring money:
           Deduct from Account A
           Add to Account B
