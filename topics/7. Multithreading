@@ -1,0 +1,96 @@
+* Volatile Keyword :
+    - Think of volatile as a “keep everyone updated immediately” instruction for a variable.
+    - First, forget Java for a moment
+        . Imagine there is a whiteboard in an office with this written on it:
+        . isRunning = true
+        . There are two employees:
+        . 👨 Employee A changes the value to false
+        . 👨 Employee B is checking the value
+    - If everyone is looking directly at the same whiteboard, Employee B immediately sees: isRunning = false
+    - That's basically what volatile helps guarantee in Java when multiple threads are using the same variable.
+
+    - Why do we need volatile?
+        . Java programs can have multiple threads running at the same time.
+        . For example:
+            boolean running = true;
+        . Imagine:
+            Thread 1 → keeps doing some work
+            Thread 2 → decides when the work should stop
+                boolean running = true;
+                Thread 1:
+                while (running) {
+                    // keep working
+                }
+            Thread 2:
+                running = false;
+            You might naturally think:
+            "Thread 2 changed running to false, so Thread 1 will see it and stop."
+            But with multiple threads, that's not something you should assume without proper synchronization.
+            A thread may keep using a locally cached copy of the value rather than immediately observing another thread's update.
+
+            Enter volatile
+                volatile boolean running = true;
+            Now you're essentially telling Java:
+            "This variable can be changed by different threads. Whenever you read it, make sure you see the latest value that's been properly published by another thread."
+            So:
+                volatile boolean running = true;
+                Thread 1:
+                while (running) {
+                    // work
+                }
+                Thread 2:
+                running = false;
+            Once Thread 2 updates running, Thread 1 is guaranteed to be able to observe that update under Java's volatile memory rules.
+
+    - A very simple analogy
+        . Think of volatile like a live Google Sheet.
+        . Without volatile:
+        . "I downloaded the spreadsheet earlier. I'll keep looking at my copy."
+        . With volatile:
+        . "Whenever I look at this cell, I need to see the properly published current value."
+        . That's the main idea.
+
+    - One VERY important thing
+        . volatile does NOT make everything thread-safe.
+            For example:
+                volatile int count = 0;
+                count++;
+                Many beginners think:
+                "count is volatile, so count++ is safe."
+                ❌ No.
+            Because:
+                count++;
+                is actually roughly:
+                1. Read count
+                2. Add 1
+                3. Write count
+                Two threads can do this at the same time:
+                Thread A: reads 5
+                Thread B: reads 5
+                Thread A: writes 6
+                Thread B: writes 6
+                You expected: 7
+                but you got: 6
+        . For operations like this, you generally need something like synchronized, AtomicInteger, or another concurrency mechanism.
+
+    - So remember these 3 words
+        . When you see:
+            volatile
+        . think:
+            Visibility, not atomicity.
+            Visibility → "Will other threads see my latest change?"
+                volatile → ✅ Yes
+            Atomicity → "Will this multi-step operation happen as one indivisible operation?"
+                volatile → ❌ Not necessarily
+
+    - In one sentence
+        . volatile tells Java that a variable may be accessed by multiple threads and that changes to it must be visible across threads according to Java's memory model.
+        . A classic real-world use is a stop flag:
+            volatile boolean stop = false;
+            while (!stop) {
+                doSomething();
+            }
+        . Another thread can simply do:
+            stop = true;
+            and the worker thread can see that change and exit.
+

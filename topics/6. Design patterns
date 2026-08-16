@@ -306,3 +306,204 @@ SOLID principles
         c. Behavioral Patterns : How objects communicate. They focus on the interaction, algorithms, and distribution of responsibilities between objects
                                  Using a Strategy pattern to easily swap different entitlement/access-control validation algorithms at runtime
 
+---
+
+* Creational Patterns :
+    1. Singleton pattern :
+        - The primary purpose of the Singleton pattern is to ensure that a class has only one instance and to provide a global point of access to that instance.
+        - In a multi-threaded applications, having multiple instances of certain components—such as database connection pools, global configuration managers, or cache coordinators—can lead to inconsistent state, memory leaks, and thread collision.
+        - The Classic Plain-Java Implementation (Double-Checked Locking)
+            . To make a class a true Singleton in Java, we need to:
+            . Hide the constructor (make it private) so no other class can call new.
+            . Create a private static variable of the same class type to hold the single instance.
+            . Provide a public static method (usually getInstance()) that returns this instance, creating it if it doesn’t exist yet (lazy initialization).
+        - In a multi-threaded environment, we must ensure that two threads hitting getInstance() at the exact same millisecond do not create two separate instances.
+          The industry standard for doing this efficiently in plain Java is Double-Checked Locking.
+            Here is how you write it:
+            public class SystemConfigManager {
+
+                // 1. The volatile keyword is critical!
+                // It prevents compiler instruction reordering, ensuring the instance
+                // is fully initialized before it's visible to other threads.
+                private static volatile SystemConfigManager instance;
+
+                // 2. Private constructor prevents instantiation via 'new'
+                private SystemConfigManager() {
+                }
+
+                // 3. Public static access point
+                public static SystemConfigManager getInstance() {
+                    // First check (no synchronization overhead if instance already exists)
+                    if (instance == null) {
+                        // Synchronize on the class block to ensure thread-safe creation
+                        synchronized (SystemConfigManager.class) {
+                            // Second check (ensures a waiting thread doesn't create a duplicate)
+                            if (instance == null) {
+                                instance = new SystemConfigManager();
+                            }
+                        }
+                    }
+                    return instance;
+                }
+            }
+
+        - Plain Java Singleton vs. Spring Singleton
+          . Since you work with Spring Boot daily, you use "Singletons" constantly
+          . However, Spring's Singleton Bean is fundamentally different from the classic GoF (Gang of Four) Singleton.
+          . This is a classic senior engineer interview topic, and knowing the distinction is crucial:
+
+            Feature                 | Classic GoF Singleton                         | Spring Singleton Bean Scope
+            ------------------------|-----------------------------------------------|------------------------------------------------------
+            Scope of Uniqueness     | Unique per JVM Classloader                    | Unique per Spring ApplicationContext (IoC Container)
+            How It's Enforced       | Private constructor and static class structure| Enforced by the Spring Container. The class itself
+                                    |                                               | is a standard public class with a public constructor.
+            Creation Control        | Hardcoded within the class logic              | Delegated to the Spring IoC Container, which manages
+                                    |                                               | lifecycle, dependency injection, etc.
+            Testability             | Difficult to test/mock because of hardcoded   | Easy to test since you can inject mock beans using
+                                    | static methods and private constructors       | Mockito or create separate contexts
+
+          . In your Spring Boot applications, when you annotate a service with @Service or @Component, Spring registers it as a singleton bean by default.
+            If you spun up two separate Spring ApplicationContext instances in the same JVM, you would get two separate instances of that bean—whereas a classic GoF Singleton would remain strictly singular across the entire JVM.
+
+    2. Builder pattern :
+        - The Builder Pattern is an essential creational pattern that solves a major problem in Java: constructing complex objects with many fields, especially when several of those fields are optional.
+        - Without a Builder, you are stuck with two bad choices:
+          1. Telescoping Constructors: Writing 5 different overloaded constructors. This becomes a nightmare to read and maintain.
+            . Imagine you walk into a restaurant to order a custom burger.
+            . If the kitchen only allowed "fixed" menu items, they would need a separate recipe and constructor for every single combination of ingredients:
+                - Burger with just bun and patty.
+                - Burger with bun, patty, and cheese.
+                - Burger with bun, patty, cheese, and lettuce.
+                - Burger with bun, patty, lettuce, and tomato (but no cheese).
+                - This is incredibly hard to read. Furthermore, if you accidentally swap two boolean parameters (like passing true for lettuce instead of tomato), the compiler won't catch the error, leading to silent bugs.
+                - Instead of pre-assembling every option, the restaurant uses an assembly line. You start with the mandatory base (the bun and patty), and then you guide the chef step-by-step: "Add cheese. Add lettuce. Hold the tomato."
+                  When you are completely done customizing, the chef wraps it up and hands it to you.
+                - This is incredibly hard to read. Furthermore, if you accidentally swap two boolean parameters (like passing true for lettuce instead of tomato), the compiler won't catch the error, leading to silent bugs.
+                  Instead of pre-assembling every option, the restaurant uses an assembly line. You start with the mandatory base (the bun and patty), and then you guide the chef step-by-step: "Add cheese. Add lettuce.
+                  Hold the tomato." When you are completely done customizing, the chef wraps it up and hands it to you.
+            . In Java, trying to handle this with standard constructors leads to a nightmare called Telescoping Constructors. You end up writing a massive list of overloaded constructors:
+          2. JavaBeans Pattern (No-arg constructor + Setters): This allows the object to be instantiated in an incomplete or invalid state before all setters are called, and completely destroys immutability, which is dangerous in highly secure multi-threaded banking systems.
+
+        - The Code: How We Do It in Plain Java
+            Here is how we translate this assembly-line process into standard, clean Java code:
+            public class Burger {
+                // All fields are final because once the burger is served, you can't alter it (immutability)
+                private final String bun;       // Required
+                private final String patty;     // Required
+                private final boolean cheese;   // Optional
+                private final boolean lettuce;  // Optional
+                private final boolean tomato;   // Optional
+
+                // 1. Private constructor: Forces instantiation exclusively through the Builder
+                private Burger(Builder builder) {
+                    this.bun = builder.bun;
+                    this.patty = builder.patty;
+                    this.cheese = builder.cheese;
+                    this.lettuce = builder.lettuce;
+                    this.tomato = builder.tomato;
+                }
+
+                // Getters only (No setters, keeping the object immutable)
+                public String getBun() { return bun; }
+                public String getPatty() { return patty; }
+                public boolean hasCheese() { return cheese; }
+                public boolean hasLettuce() { return lettuce; }
+                public boolean hasTomato() { return tomato; }
+
+                @Override
+                public String toString() {
+                    return "Burger [Bun=" + bun + ", Patty=" + patty + ", Cheese=" + cheese + ", Lettuce=" + lettuce + ", Tomato=" + tomato + "]";
+                }
+
+                // 2. The Static Inner Builder (The assembly line worker)
+                public static class Builder {
+                    private final String bun;   // Required
+                    private final String patty; // Required
+
+                    // Optionals initialized to safe default values
+                    private boolean cheese = false;
+                    private boolean lettuce = false;
+                    private boolean tomato = false;
+
+                    // The builder constructor mandates the absolute minimum required fields
+                    public Builder(String bun, String patty) {
+                        this.bun = bun;
+                        this.patty = patty;
+                    }
+
+                    // Fluent "setter" methods that modify the builder and return "this" (the builder itself)
+                    public Builder addCheese() {
+                        this.cheese = true;
+                        return this; // Returning 'this' allows us to chain methods!
+                    }
+
+                    public Builder addLettuce() {
+                        this.lettuce = true;
+                        return this;
+                    }
+
+                    public Builder addTomato() {
+                        this.tomato = true;
+                        return this;
+                    }
+
+                    // 3. The final "wrap it up" step
+                    public Burger build() {
+                        return new Burger(this);
+                    }
+                }
+            }
+
+            - Now, look how clean, readable, and self-documenting it is to construct different burgers from your main method:
+                public class Restaurant {
+                    public static void main(String[] args) {
+                        // Build a simple cheeseburger
+                        Burger cheeseburger = new Burger.Builder("Brioche", "Beef")
+                                .addCheese()
+                                .build();
+
+                        // Build a fully loaded burger (order of optional ingredients doesn't matter!)
+                        Burger loadedBurger = new Burger.Builder("Sesame", "Chicken")
+                                .addLettuce()
+                                .addCheese()
+                                .addTomato()
+                                .build();
+
+                        System.out.println(cheeseburger);
+                        System.out.println(loadedBurger);
+                    }
+                }
+
+        - How this maps to Spring & Lombok
+            You will see this design pattern utilized constantly across Spring Boot because it makes writing clean APIs incredibly easy
+                1. Spring's ResponseEntity (HTTP Responses)
+                When writing REST controller endpoints, you often need to return an HTTP response with headers, status codes, and a body. Instead of a messy multi-parameter constructor, Spring provides a builder pattern:
+                @GetMapping("/api/burger")
+                public ResponseEntity<Burger> getBurger() {
+                    Burger burger = new Burger.Builder("Brioche", "Beef").addCheese().build();
+
+                    // Spring's built-in ResponseEntity Builder in action:
+                    return ResponseEntity.ok()                     // Sets status to 200 OK
+                            .header("Custom-Header", "BurgerTime")  // Custom header config
+                            .body(burger);                          // Attaches the payload and returns the response
+                }
+                2. Lombok's @Builder
+                In modern Spring Boot development, writing the manual static inner class is considered boilerplate. Lombok gives us a shortcut. By adding @Builder to your model class, Lombok's annotation processor generates the exact same static inner class and builder methods for you at compile-time:
+                import lombok.Builder;
+                import lombok.Getter;
+
+                @Getter
+                @Builder // Lombok automatically writes the entire inner Builder class for you!
+                public class Burger {
+                    private final String bun;
+                    private final String patty;
+                    private final boolean cheese;
+                    private final boolean lettuce;
+                    private final boolean tomato;
+                }
+
+
+
+
+
+
