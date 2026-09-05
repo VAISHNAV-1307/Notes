@@ -502,6 +502,106 @@ SOLID principles
                     private final boolean tomato;
                 }
 
+    3. Factory Method Pattern
+        - Imagine a smart vending machine that dispenses hot drinks.
+        - As a customer, you don't want to worry about the internal recipe. You don’t want to manually grab coffee beans, grind them, heat water to exactly 90°C, and pour the milk.
+        - If the vending machine forced you to do that, it would be a terrible user experience. Instead, you simply walk up, press the "Espresso" or "Latte" button, and the machine handles the complex assembly.
+        - In your code, you receive a standard cup of "Drink" (a common interface) without ever knowing the exact class or steps used to make it.
+        - In software, the Factory Method Pattern defines an interface for creating an object, but lets the subclasses or factory classes decide exactly which class to instantiate.
+        - It decouples your business logic from the concrete implementation of the objects it needs.
+
+        - The Code: How We Do It in Plain Java
+        - Let’s translate our vending machine analogy into clean, standard Java code.
+            1. Define the Common Product Interface
+            Every concrete product must adhere to the same contract:
+            public interface Drink {
+                void prepare();
+            }
+
+            2. Create the Concrete Products
+            These are the actual classes that implement our interface:
+            public class Espresso implements Drink {
+                @Override
+                public void prepare() {
+                    System.out.println("Brewing a strong, concentrated Espresso shot...");
+                }
+            }
+
+            public class Latte implements Drink {
+                @Override
+                public void prepare() {
+                    System.out.println("Steaming milk and mixing with a shot of Espresso to make a Latte...");
+                }
+            }
+
+            3. Create the Factory
+            The factory is the "vending machine." It encapsulates the instantiation logic so that the client code (the person using the vending machine) doesn't have to use the new keyword or know about Espresso or Latte directly.
+            public class DrinkFactory {
+
+                // The factory method determines which object to create based on input
+                public static Drink getDrink(String drinkType) {
+                    if (drinkType == null) {
+                        return null;
+                    }
+
+                    switch (drinkType.toUpperCase()) {
+                        case "ESPRESSO":
+                            return new Espresso();
+                        case "LATTE":
+                            return new Latte();
+                        default:
+                            throw new IllegalArgumentException("Unknown drink type: " + drinkType);
+                    }
+                }
+            }
+
+            4. Using the Factory in the Client Application
+            Notice how the client code never uses the new keyword to create an Espresso or Latte object. It only interacts with the abstract Drink interface:
+            public class VendingMachineApplication {
+                public static void main(String[] args) {
+                    // We want an espresso. We don't say "new Espresso()".
+                    // We let the factory do the heavy lifting.
+                    Drink customerOrder = DrinkFactory.getDrink("ESPRESSO");
+                    customerOrder.prepare(); // Prints: Brewing a strong, concentrated Espresso shot...
+
+                    // Now we want a latte
+                    Drink anotherOrder = DrinkFactory.getDrink("LATTE");
+                    anotherOrder.prepare(); // Prints: Steaming milk...
+                }
+            }
+
+        - Why is this beneficial?
+          If tomorrow you decide to add a new drink, like "Cappuccino", you only need to write the Cappuccino class and add one case to your DrinkFactory.
+          Your main application code doesn't change at all because it only expects a Drink.
+
+        - How This Applies to Spring Boot
+          As a Spring Boot engineer, the Factory pattern is the absolute backbone of your entire application
+          1. The IoC Container (BeanFactory)
+            In Spring, you rarely write new MyService(). Instead, you annotate your classes with @Service or @Component and let Spring manage them.
+            The core of Spring's Inversion of Control (IoC) is the BeanFactory
+            The BeanFactory is a massive, highly optimized Factory class. When you request a bean (or when Spring injects one via @Autowired), Spring acts as the vending machine:
+            // Under the hood, Spring's ApplicationContext acts as a Factory Method:
+            MyService service = applicationContext.getBean(MyService.class);
+            You don't care how MyService was created, what other beans were injected into its constructor, or how its lifecycle is managed. You just press the button and receive your "bean."
+          2. The @Bean Annotation
+            When you write a configuration class in Spring, you are explicitly creating custom Factory Methods:
+            @Configuration
+            public class AppConfig {
+
+                // This method is a Factory Method!
+                // Spring executes this method and registers the returned object in its container.
+                @Bean
+                public Drink customCoffee() {
+                    return new Espresso();
+                }
+            }
+
+        - Summary
+          . The Factory Method Pattern is about delegating object creation:
+          . It shields your application from the details of how complex objects are created.
+          . It reduces tight coupling by returning interfaces instead of concrete classes.
+          . It serves as the foundation of Spring's Dependency Injection Engine (BeanFactory)
+
 
 
 
