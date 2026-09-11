@@ -602,6 +602,112 @@ SOLID principles
           . It reduces tight coupling by returning interfaces instead of concrete classes.
           . It serves as the foundation of Spring's Dependency Injection Engine (BeanFactory)
 
+    4. Prototype Pattern
+    - Imagine you are applying for a visa and have to fill out a massive 20-page application form.
+    - 18 of those pages are exactly the same for every single application (general terms, country laws, embassy addresses, and default disclaimers). Only the last 2 pages contain your specific personal details.
+    - If you had to write all 20 pages by hand from scratch every single time, it would take hours and waste a massive amount of energy.
+    - Instead, you keep a "master copy" (a template) that is pre-filled with those 18 pages of static information. When you need a new application, you simply put the master copy on a photocopy machine to clone it, and then you quickly handwrite your specific personal details on the new copy.
+    - In software, the Prototype Pattern is used when creating a brand-new object from scratch is too "expensive" (e.g., it requires heavy database queries, reading configuration files, or complex calculations). Instead of using the new keyword and rebuilding the object step-by-step, you clone an existing, pre-configured instance and modify only what is different.
+
+    The Code: How We Do It in Plain Java
+    - In Java, we can implement the Prototype Pattern using the built-in Cloneable interface and overriding the clone() method.
+    - Example : customizable `EmailTemplate` class that fetches massive default disclaimer text (simulating an expensive operation) once, and then clones it:
+
+        1. Implement Cloneable to tell the JVM it's safe to make field-for-field copies of this object
+            public class EmailTemplate {
+                private String header;
+                private String body;
+                private String expensiveDisclaimer;
+
+                public EmailTemplate() {
+                    try {
+                        // Simulating a heavy resource-intensive initialization
+                        System.out.println("Connecting to Database to fetch global disclaimer...");
+                        Thread.sleep(2000); // Sleep for 2 seconds
+                        this.expensiveDisclaimer = "DISCLAIMER: This email is confidential and property of VendingCorp...";
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // Setters and Getters
+                public void setHeader(String header) {
+                    this.header = header;
+                }
+
+                public void setBody(String body) {
+                    this.body = body;
+                }
+
+                public String getHeader() {
+                    return header;
+                }
+
+                public String getBody() {
+                    return body;
+                }
+
+                public String getExpensiveDisclaimer() {
+                    return expensiveDisclaimer;
+                }
+
+                // 2. Override the clone() method to perform the copy operation
+                @Override
+                public EmailTemplate clone() {
+                    try {
+                        // super.clone() does a fast bitwise memory copy (shallow copy)
+                        return (EmailTemplate) super.clone();
+                    } catch (CloneNotSupportedException e) {
+                        throw new AssertionError();
+                        // Should not happen since we implement Cloneable
+                    }
+                }
+
+                @Override
+                public String toString() {
+                    return "EmailTemplate [\\n Header=" + header + ",\\n Body=" + body + ",\\n Disclaimer=" + expensiveDisclaimer + "\\n]";
+                }
+            }
+
+        2. How We Use It to Save Performance Cost:
+        - Instead of calling `new EmailTemplate()` multiple times (which would hit the "database" over and over), we instantiate a single prototype master object once and clone it dynamically
+            // Prototype design pattern
+
+            System.out.println("--- Creating the Master Prototype ---");
+            EmailTemplate masterPrototype = new EmailTemplate();
+
+            // Hits database once
+            masterPrototype.setHeader("Welcome to VendingCorp!");
+            System.out.println("--- Cloning for Customer A ---");
+
+            // We clone the master template. This is instant! No database latency.
+            EmailTemplate customerAEmail = masterPrototype.clone();
+            customerAEmail.setBody("Hello Customer A, your order is ready.");
+            System.out.println("--- Cloning for Customer B ---");
+
+            EmailTemplate customerBEmail = masterPrototype.clone();
+            customerBEmail.setBody("Hello Customer B, your invoice is attached.");
+
+            System.out.println(customerAEmail);
+            System.out.println(customerBEmail);
+
+    How This Applies to Spring Boot: The Prototype Bean Scope
+        - In Spring, when you define a class with `@Component` or `@Service`, Spring registers it as a Singleton by default—meaning only one instance of that bean lives inside the container.
+        - However, sometimes you need a stateful bean where every class that injects it gets a fresh, independent instance. For this, you use Prototype Scope
+        - @Component @Scope(ConfigurableBeanFactory.SCOPE\_PROTOTYPE) // Or simply @Scope("prototype")
+            public class UserSessionTracker {
+                private String currentActiveUser;
+                // State is local to whoever requested this bean!
+            }
+
+        - The Difference under the hood:
+          * Singleton Scope:** When class `A` and class `B` both `@Autowired` a singleton bean, they are handed the exact same shared memory reference from Spring's IoC container.
+          * Prototype Scope:** When class `A` and class `B` `@Autowired` a prototype bean, Spring's container acts as a prototype factory—it spins up and configures a brand-new instance for each of them, ensuring they never share or corrupt each other's local state.
+
+
+
+
+
 
 
 
