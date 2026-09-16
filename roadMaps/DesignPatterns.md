@@ -1,6 +1,6 @@
 <style>
 body {
-    font-family: "Calibri", sans-serif;
+    font-family: "SF Mono", sans-serif;
     font-size: 16px;
     line-height: 1.3;
 }

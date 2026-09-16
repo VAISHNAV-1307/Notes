@@ -1,3 +1,10 @@
+<style>
+body {
+    font-family: "SF Mono", sans-serif;
+    font-size: 16px;
+    line-height: 1.3;
+}
+</style>
 # Java Learning Notes
 
 A comprehensive collection of Java and Spring framework notes for software development learning and reference.
