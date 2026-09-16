@@ -1,3 +1,11 @@
+<style>
+body {
+    font-family: "Calibri", sans-serif;
+    font-size: 16px;
+    line-height: 1.3;
+}
+</style>
+
 # Design Patterns Roadmap — Tailored to Java/Spring Backend (Banking Domain)
 
 This roadmap skips generic OOP basics and instead maps each pattern to things you've already built: your delegation module, notification service, dashboard configurator, ICaps widgets, and Fincro Dashboard. For each phase: implement the pattern manually in plain Java first, then find (or deliberately apply) its equivalent in your own code before moving on.
